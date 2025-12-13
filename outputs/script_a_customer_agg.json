@@ -1,0 +1,82 @@
+{
+  "script_name": "script_a_customer_agg.py",
+  "dataframes": [
+    {
+      "df_name": "df1",
+      "type": "source",
+      "columns": []
+    },
+    {
+      "df_name": "dfAgg",
+      "type": "intermediate",
+      "columns": [
+        {
+          "name": "big_amount",
+          "derived_from": [],
+          "expression": "F.col('total_amount') + F.col('total_revenue')",
+          "transformation": "withColumn"
+        },
+        {
+          "name": "customer_id",
+          "derived_from": [
+            "customer_id"
+          ],
+          "expression": "",
+          "transformation": "groupByKey"
+        },
+        {
+          "name": "product_id",
+          "derived_from": [
+            "product_id"
+          ],
+          "expression": "",
+          "transformation": "groupByKey"
+        },
+        {
+          "name": "event_date",
+          "derived_from": [
+            "event_date"
+          ],
+          "expression": "",
+          "transformation": "groupByKey"
+        },
+        {
+          "name": "total_amount",
+          "derived_from": [
+            "amount"
+          ],
+          "expression": "F.sum('amount')",
+          "transformation": "aggregation"
+        },
+        {
+          "name": "total_revenue",
+          "derived_from": [
+            "revenue"
+          ],
+          "expression": "F.sum('revenue')",
+          "transformation": "aggregation"
+        }
+      ]
+    },
+    {
+      "df_name": "dfCurated",
+      "type": "sink",
+      "columns": []
+    }
+  ],
+  "assets": {
+    "reads": [
+      {
+        "format": "parquet",
+        "path": "s3a://mybucket/landing/customer_landing.parquet"
+      }
+    ],
+    "writes": [
+      {
+        "format": "parquet",
+        "path": "s3a://mybucket/curated/customer_agg/",
+        "df": "parquet"
+      }
+    ]
+  }
+}

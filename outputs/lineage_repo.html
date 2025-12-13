@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="UTF-8"/>
+<title>Repo Lineage</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>mermaid.initialize({startOnLoad:true,theme:"dark"});</script>
+<style>
+body{font-family:system-ui;background:#0f172a;color:#e5e7eb;margin:0}
+header{padding:1rem 1.5rem;background:#020617;border-bottom:1px solid #1f2937}
+main{padding:1rem 1.5rem}
+.mermaid{background:#020617;padding:1rem;border-radius:8px;margin:.75rem 0; overflow:auto}
+details{margin:.5rem 0}
+summary{cursor:pointer;font-weight:600}
+hr{border:0;border-top:1px solid #1f2937;margin:1rem 0}
+small{color:#9ca3af}
+</style>
+</head><body>
+<header>
+<h1>Repo Metadata Lineage</h1>
+<p><small>Expand a dataframe to see groupBy, aggregations, derived columns, joins, and column-to-column lineage.</small></p>
+</header>
+<main>
+
+<h2>1. Overview (Scripts + Assets + Cross-Script Links)</h2>
+<div class="mermaid">
+flowchart LR
+
+script_a_customer_agg_py["script_a_customer_agg.py"]
+asset_s3a___mybucket_curated_customer_agg_["WRITE\ns3a://mybucket/curated/customer_agg/"]
+script_a_customer_agg_py --> asset_s3a___mybucket_curated_customer_agg_
+asset_s3a___mybucket_landing_customer_landing_parquet["READ\ns3a://mybucket/landing/customer_landing.parquet"]
+asset_s3a___mybucket_landing_customer_landing_parquet --> script_a_customer_agg_py
+script_b_join_products_py["script_b_join_products.py"]
+asset_s3a___mybucket_stage_cust_products_["WRITE\ns3a://mybucket/stage/cust_products/"]
+script_b_join_products_py --> asset_s3a___mybucket_stage_cust_products_
+asset_s3a___mybucket_curated_customer_agg_["READ\ns3a://mybucket/curated/customer_agg/"]
+asset_s3a___mybucket_curated_customer_agg_ --> script_b_join_products_py
+asset_s3a___mybucket_ref_products_parquet["READ\ns3a://mybucket/ref/products.parquet"]
+asset_s3a___mybucket_ref_products_parquet --> script_b_join_products_py
+asset_s3a___mybucket_curated_customer_agg["ASSET\ns3a://mybucket/curated/customer_agg"]
+script_a_customer_agg_py --> asset_s3a___mybucket_curated_customer_agg --> script_b_join_products_py
+</div>
+<hr/>
+<h2>2. DataFrames (expand)</h2>
+<h3>script_a_customer_agg.py</h3>
+<details>
+<summary>df1 (source)</summary>
+<div class="mermaid">
+flowchart TB
+DF_df1["df1"]
+</div>
+</details>
+<details>
+<summary>dfAgg (intermediate)</summary>
+<div class="mermaid">
+flowchart TB
+DF_dfAgg["dfAgg"]
+dfAgg_col_big_amount["big_amount"]
+dfAgg_col_big_amount --> DF_dfAgg
+dfAgg_col_total_amount["dfAgg.total_amount"]
+dfAgg_col_total_amount --> dfAgg_col_big_amount
+dfAgg_col_total_revenue["dfAgg.total_revenue"]
+dfAgg_col_total_revenue --> dfAgg_col_big_amount
+dfAgg_col_customer_id["customer_id"]
+dfAgg_col_customer_id --> DF_dfAgg
+dfAgg_col_customer_id["dfAgg.customer_id"]
+dfAgg_col_customer_id --> dfAgg_col_customer_id
+dfAgg_col_product_id["product_id"]
+dfAgg_col_product_id --> DF_dfAgg
+dfAgg_col_product_id["dfAgg.product_id"]
+dfAgg_col_product_id --> dfAgg_col_product_id
+dfAgg_col_event_date["event_date"]
+dfAgg_col_event_date --> DF_dfAgg
+dfAgg_col_event_date["dfAgg.event_date"]
+dfAgg_col_event_date --> dfAgg_col_event_date
+dfAgg_col_total_amount["total_amount"]
+dfAgg_col_total_amount --> DF_dfAgg
+dfAgg_col_amount["dfAgg.amount"]
+dfAgg_col_amount --> dfAgg_col_total_amount
+dfAgg_col_total_revenue["total_revenue"]
+dfAgg_col_total_revenue --> DF_dfAgg
+dfAgg_col_revenue["dfAgg.revenue"]
+dfAgg_col_revenue --> dfAgg_col_total_revenue
+dfAgg_col_customer_id["customer_id"]
+dfAgg_col_customer_id --> DF_dfAgg
+df1_col_customer_id["df1.customer_id"]
+df1_col_customer_id --> dfAgg_col_customer_id
+dfAgg_col_product_id["product_id"]
+dfAgg_col_product_id --> DF_dfAgg
+df1_col_product_id["df1.product_id"]
+df1_col_product_id --> dfAgg_col_product_id
+dfAgg_col_event_date["event_date"]
+dfAgg_col_event_date --> DF_dfAgg
+df1_col_event_date["df1.event_date"]
+df1_col_event_date --> dfAgg_col_event_date
+dfAgg_col_total_amount["total_amount"]
+dfAgg_col_total_amount --> DF_dfAgg
+df1_col_amount["df1.amount"]
+df1_col_amount --> dfAgg_col_total_amount
+dfAgg_col_total_revenue["total_revenue"]
+dfAgg_col_total_revenue --> DF_dfAgg
+df1_col_revenue["df1.revenue"]
+df1_col_revenue --> dfAgg_col_total_revenue
+dfAgg_groupby["groupBy(customer_id, product_id, event_date)"]
+dfAgg_groupby --> DF_dfAgg
+dfAgg_agg_total_amount["F.sum('amount')"]
+dfAgg_col_total_amount["total_amount"]
+dfAgg_agg_total_amount --> dfAgg_col_total_amount --> DF_dfAgg
+dfAgg_agg_total_revenue["F.sum('revenue')"]
+dfAgg_col_total_revenue["total_revenue"]
+dfAgg_agg_total_revenue --> dfAgg_col_total_revenue --> DF_dfAgg
+dfAgg_der_big_amount["big_amount = F.col('total_amount') + F.col('total_revenue')"]
+dfAgg_col_big_amount["big_amount"]
+dfAgg_der_big_amount --> dfAgg_col_big_amount --> DF_dfAgg
+</div>
+</details>
+<details>
+<summary>dfCurated (sink)</summary>
+<div class="mermaid">
+flowchart TB
+DF_dfCurated["dfCurated"]
+</div>
+</details>
+<h3>script_b_join_products.py</h3>
+<details>
+<summary>df3 (source)</summary>
+<div class="mermaid">
+flowchart TB
+DF_df3["df3"]
+</div>
+</details>
+<details>
+<summary>dfProducts (intermediate)</summary>
+<div class="mermaid">
+flowchart TB
+DF_dfProducts["dfProducts"]
+</div>
+</details>
+<details>
+<summary>dfJoined (intermediate)</summary>
+<div class="mermaid">
+flowchart TB
+DF_dfJoined["dfJoined"]
+dfJoined_col___join__dfProducts["__join__dfProducts"]
+dfJoined_col___join__dfProducts --> DF_dfJoined
+dfJoined_col_product_id["dfJoined.product_id"]
+dfJoined_col_product_id --> dfJoined_col___join__dfProducts
+dfJoined_col_product_id["product_id"]
+dfJoined_col_product_id --> DF_dfJoined
+dfProducts_col_product_id["dfProducts.product_id"]
+dfProducts_col_product_id --> dfJoined_col_product_id
+dfProducts_col_product_id["dfProducts.product_id"]
+dfProducts_col_product_id --> dfJoined_col_product_id
+dfJoined_join_dfProducts_product_id["join dfProducts on product_id (left)"]
+dfJoined_join_dfProducts_product_id --> DF_dfJoined
+</div>
+</details>
+<details>
+<summary>dfStage (sink)</summary>
+<div class="mermaid">
+flowchart TB
+DF_dfStage["dfStage"]
+dfStage_col_margin["margin"]
+dfStage_col_margin --> DF_dfStage
+dfStage_col_big_amount["dfStage.big_amount"]
+dfStage_col_big_amount --> dfStage_col_margin
+dfStage_col_price["dfStage.price"]
+dfStage_col_price --> dfStage_col_margin
+dfStage_col_is_profitable["is_profitable"]
+dfStage_col_is_profitable --> DF_dfStage
+dfStage_col_margin["dfStage.margin"]
+dfStage_col_margin --> dfStage_col_is_profitable
+</div>
+</details>
+</main></body></html>

@@ -1,0 +1,21 @@
+{
+  "script_name": "",
+  "dataframes": [
+    {
+      "df_name": "",
+      "type": "source|intermediate|sink",
+      "columns": [
+        {
+          "name": "",
+          "derived_from": [],
+          "expression": "",
+          "transformation": ""
+        }
+      ]
+    }
+  ],
+  "assets": {
+    "reads": [],
+    "writes": []
+  }
+}

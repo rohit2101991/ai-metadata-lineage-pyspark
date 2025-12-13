@@ -1,0 +1,238 @@
+{
+  "script_name": "script_a_customer_agg.py",
+  "dataframes": [
+    {
+      "df_name": "df1",
+      "type": "source",
+      "columns": [],
+      "assets": {
+        "reads": [
+          {
+            "format": "parquet",
+            "path": "s3a://mybucket/landing/customer_landing.parquet"
+          }
+        ]
+      },
+      "lineage": []
+    },
+    {
+      "df_name": "dfAgg",
+      "type": "intermediate",
+      "columns": [
+        {
+          "name": "big_amount",
+          "derived_from": [
+            "total_amount",
+            "total_revenue"
+          ],
+          "expression": "F.col('total_amount') + F.col('total_revenue')",
+          "transformation": "withColumn"
+        },
+        {
+          "name": "customer_id",
+          "derived_from": [
+            "customer_id"
+          ],
+          "expression": "",
+          "transformation": "groupByKey"
+        },
+        {
+          "name": "product_id",
+          "derived_from": [
+            "product_id"
+          ],
+          "expression": "",
+          "transformation": "groupByKey"
+        },
+        {
+          "name": "event_date",
+          "derived_from": [
+            "event_date"
+          ],
+          "expression": "",
+          "transformation": "groupByKey"
+        },
+        {
+          "name": "total_amount",
+          "derived_from": [
+            "amount"
+          ],
+          "expression": "F.sum('amount')",
+          "transformation": "aggregation"
+        },
+        {
+          "name": "total_revenue",
+          "derived_from": [
+            "revenue"
+          ],
+          "expression": "F.sum('revenue')",
+          "transformation": "aggregation"
+        }
+      ],
+      "group_by": [
+        "customer_id",
+        "product_id",
+        "event_date"
+      ],
+      "aggregations": [
+        {
+          "out_col": "total_amount",
+          "func": "sum",
+          "in_col": "amount",
+          "expression": "F.sum('amount')"
+        },
+        {
+          "out_col": "total_revenue",
+          "func": "sum",
+          "in_col": "revenue",
+          "expression": "F.sum('revenue')"
+        }
+      ],
+      "derived": [
+        {
+          "out_col": "big_amount",
+          "expression": "F.col('total_amount') + F.col('total_revenue')",
+          "derived_from": [
+            "total_amount",
+            "total_revenue"
+          ]
+        }
+      ],
+      "lineage": [
+        {
+          "target_col": "big_amount",
+          "sources": [
+            {
+              "df": "dfAgg",
+              "col": "total_amount"
+            },
+            {
+              "df": "dfAgg",
+              "col": "total_revenue"
+            }
+          ]
+        },
+        {
+          "target_col": "customer_id",
+          "sources": [
+            {
+              "df": "dfAgg",
+              "col": "customer_id"
+            }
+          ]
+        },
+        {
+          "target_col": "product_id",
+          "sources": [
+            {
+              "df": "dfAgg",
+              "col": "product_id"
+            }
+          ]
+        },
+        {
+          "target_col": "event_date",
+          "sources": [
+            {
+              "df": "dfAgg",
+              "col": "event_date"
+            }
+          ]
+        },
+        {
+          "target_col": "total_amount",
+          "sources": [
+            {
+              "df": "dfAgg",
+              "col": "amount"
+            }
+          ]
+        },
+        {
+          "target_col": "total_revenue",
+          "sources": [
+            {
+              "df": "dfAgg",
+              "col": "revenue"
+            }
+          ]
+        },
+        {
+          "target_col": "customer_id",
+          "sources": [
+            {
+              "df": "df1",
+              "col": "customer_id"
+            }
+          ]
+        },
+        {
+          "target_col": "product_id",
+          "sources": [
+            {
+              "df": "df1",
+              "col": "product_id"
+            }
+          ]
+        },
+        {
+          "target_col": "event_date",
+          "sources": [
+            {
+              "df": "df1",
+              "col": "event_date"
+            }
+          ]
+        },
+        {
+          "target_col": "total_amount",
+          "sources": [
+            {
+              "df": "df1",
+              "col": "amount"
+            }
+          ]
+        },
+        {
+          "target_col": "total_revenue",
+          "sources": [
+            {
+              "df": "df1",
+              "col": "revenue"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "df_name": "dfCurated",
+      "type": "sink",
+      "columns": [],
+      "assets": {
+        "writes": [
+          {
+            "format": "parquet",
+            "path": "s3a://mybucket/curated/customer_agg/",
+            "df": "parquet"
+          }
+        ]
+      },
+      "lineage": []
+    }
+  ],
+  "assets": {
+    "reads": [
+      {
+        "format": "parquet",
+        "path": "s3a://mybucket/landing/customer_landing.parquet"
+      }
+    ],
+    "writes": [
+      {
+        "format": "parquet",
+        "path": "s3a://mybucket/curated/customer_agg/",
+        "df": "parquet"
+      }
+    ]
+  }
+}

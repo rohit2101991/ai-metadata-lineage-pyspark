@@ -1,0 +1,18 @@
+[
+  "script_b_join_products.py:read:s3a://mybucket/curated/customer_agg/",
+  "script_b_join_products.py:read:s3a://mybucket/ref/products.parquet",
+  "script_b_join_products.py:dfJoined:__join__dfProducts",
+  "script_b_join_products.py:dfStage:margin",
+  "script_b_join_products.py:dfStage:is_profitable",
+  "script_b_join_products.py:write:s3a://mybucket/stage/cust_products/",
+  "script_a_customer_agg.py:read:s3a://mybucket/landing/customer_landing.parquet",
+  "script_a_customer_agg.py:dfAgg:big_amount",
+  "script_a_customer_agg.py:dfAgg:customer_id",
+  "script_a_customer_agg.py:dfAgg:product_id",
+  "script_a_customer_agg.py:dfAgg:event_date",
+  "script_a_customer_agg.py:dfAgg:total_amount",
+  "script_a_customer_agg.py:dfAgg:total_revenue",
+  "script_a_customer_agg.py:dfAgg:agg:total_amount",
+  "script_a_customer_agg.py:dfAgg:agg:total_revenue",
+  "script_a_customer_agg.py:write:s3a://mybucket/curated/customer_agg/"
+]

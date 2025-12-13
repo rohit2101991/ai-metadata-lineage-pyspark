@@ -1,0 +1,9 @@
+{
+  "links": [
+    {
+      "from_script": "script_a_customer_agg.py",
+      "to_script": "script_b_join_products.py",
+      "asset": "s3a://mybucket/curated/customer_agg"
+    }
+  ]
+}

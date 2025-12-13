@@ -1,0 +1,139 @@
+[
+  {
+    "id": "script_b_join_products.py:read:s3a://mybucket/curated/customer_agg/",
+    "text": "Script script_b_join_products.py reads data from s3a://mybucket/curated/customer_agg/",
+    "meta": {
+      "script": "script_b_join_products.py",
+      "asset": "s3a://mybucket/curated/customer_agg/"
+    }
+  },
+  {
+    "id": "script_b_join_products.py:read:s3a://mybucket/ref/products.parquet",
+    "text": "Script script_b_join_products.py reads data from s3a://mybucket/ref/products.parquet",
+    "meta": {
+      "script": "script_b_join_products.py",
+      "asset": "s3a://mybucket/ref/products.parquet"
+    }
+  },
+  {
+    "id": "script_b_join_products.py:dfJoined:__join__dfProducts",
+    "text": "\nScript script_b_join_products.py, dataframe dfJoined, column __join__dfProducts.\nExpression: join(dfProducts) on product_id (left).\nDerived from: ['product_id'].\n",
+    "meta": {
+      "script": "script_b_join_products.py",
+      "df": "dfJoined",
+      "column": "__join__dfProducts"
+    }
+  },
+  {
+    "id": "script_b_join_products.py:dfStage:margin",
+    "text": "\nScript script_b_join_products.py, dataframe dfStage, column margin.\nExpression: F.col('big_amount') - F.col('price').\nDerived from: ['big_amount', 'price'].\n",
+    "meta": {
+      "script": "script_b_join_products.py",
+      "df": "dfStage",
+      "column": "margin"
+    }
+  },
+  {
+    "id": "script_b_join_products.py:dfStage:is_profitable",
+    "text": "\nScript script_b_join_products.py, dataframe dfStage, column is_profitable.\nExpression: F.when(F.col('margin') > 0, F.lit(True)).otherwise(F.lit(False)).\nDerived from: ['margin'].\n",
+    "meta": {
+      "script": "script_b_join_products.py",
+      "df": "dfStage",
+      "column": "is_profitable"
+    }
+  },
+  {
+    "id": "script_b_join_products.py:write:s3a://mybucket/stage/cust_products/",
+    "text": "Script script_b_join_products.py writes data to s3a://mybucket/stage/cust_products/",
+    "meta": {
+      "script": "script_b_join_products.py",
+      "asset": "s3a://mybucket/stage/cust_products/"
+    }
+  },
+  {
+    "id": "script_a_customer_agg.py:read:s3a://mybucket/landing/customer_landing.parquet",
+    "text": "Script script_a_customer_agg.py reads data from s3a://mybucket/landing/customer_landing.parquet",
+    "meta": {
+      "script": "script_a_customer_agg.py",
+      "asset": "s3a://mybucket/landing/customer_landing.parquet"
+    }
+  },
+  {
+    "id": "script_a_customer_agg.py:dfAgg:big_amount",
+    "text": "\nScript script_a_customer_agg.py, dataframe dfAgg, column big_amount.\nExpression: F.col('total_amount') + F.col('total_revenue').\nDerived from: ['total_amount', 'total_revenue'].\n",
+    "meta": {
+      "script": "script_a_customer_agg.py",
+      "df": "dfAgg",
+      "column": "big_amount"
+    }
+  },
+  {
+    "id": "script_a_customer_agg.py:dfAgg:customer_id",
+    "text": "\nScript script_a_customer_agg.py, dataframe dfAgg, column customer_id.\nExpression: .\nDerived from: ['customer_id'].\n",
+    "meta": {
+      "script": "script_a_customer_agg.py",
+      "df": "dfAgg",
+      "column": "customer_id"
+    }
+  },
+  {
+    "id": "script_a_customer_agg.py:dfAgg:product_id",
+    "text": "\nScript script_a_customer_agg.py, dataframe dfAgg, column product_id.\nExpression: .\nDerived from: ['product_id'].\n",
+    "meta": {
+      "script": "script_a_customer_agg.py",
+      "df": "dfAgg",
+      "column": "product_id"
+    }
+  },
+  {
+    "id": "script_a_customer_agg.py:dfAgg:event_date",
+    "text": "\nScript script_a_customer_agg.py, dataframe dfAgg, column event_date.\nExpression: .\nDerived from: ['event_date'].\n",
+    "meta": {
+      "script": "script_a_customer_agg.py",
+      "df": "dfAgg",
+      "column": "event_date"
+    }
+  },
+  {
+    "id": "script_a_customer_agg.py:dfAgg:total_amount",
+    "text": "\nScript script_a_customer_agg.py, dataframe dfAgg, column total_amount.\nExpression: F.sum('amount').\nDerived from: ['amount'].\n",
+    "meta": {
+      "script": "script_a_customer_agg.py",
+      "df": "dfAgg",
+      "column": "total_amount"
+    }
+  },
+  {
+    "id": "script_a_customer_agg.py:dfAgg:total_revenue",
+    "text": "\nScript script_a_customer_agg.py, dataframe dfAgg, column total_revenue.\nExpression: F.sum('revenue').\nDerived from: ['revenue'].\n",
+    "meta": {
+      "script": "script_a_customer_agg.py",
+      "df": "dfAgg",
+      "column": "total_revenue"
+    }
+  },
+  {
+    "id": "script_a_customer_agg.py:dfAgg:agg:total_amount",
+    "text": "\nScript script_a_customer_agg.py aggregates amount using sum\nto produce total_amount in dataframe dfAgg.\n",
+    "meta": {
+      "script": "script_a_customer_agg.py",
+      "df": "dfAgg"
+    }
+  },
+  {
+    "id": "script_a_customer_agg.py:dfAgg:agg:total_revenue",
+    "text": "\nScript script_a_customer_agg.py aggregates revenue using sum\nto produce total_revenue in dataframe dfAgg.\n",
+    "meta": {
+      "script": "script_a_customer_agg.py",
+      "df": "dfAgg"
+    }
+  },
+  {
+    "id": "script_a_customer_agg.py:write:s3a://mybucket/curated/customer_agg/",
+    "text": "Script script_a_customer_agg.py writes data to s3a://mybucket/curated/customer_agg/",
+    "meta": {
+      "script": "script_a_customer_agg.py",
+      "asset": "s3a://mybucket/curated/customer_agg/"
+    }
+  }
+]

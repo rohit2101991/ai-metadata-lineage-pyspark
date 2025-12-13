@@ -1,0 +1,66 @@
+{
+  "script_name": "script_b_join_products.py",
+  "dataframes": [
+    {
+      "df_name": "df3",
+      "type": "source",
+      "columns": []
+    },
+    {
+      "df_name": "dfProducts",
+      "type": "intermediate",
+      "columns": []
+    },
+    {
+      "df_name": "dfJoined",
+      "type": "intermediate",
+      "columns": [
+        {
+          "name": "__join__dfProducts",
+          "derived_from": [
+            "product_id"
+          ],
+          "expression": "join(dfProducts) on product_id (left)",
+          "transformation": "join"
+        }
+      ]
+    },
+    {
+      "df_name": "dfStage",
+      "type": "sink",
+      "columns": [
+        {
+          "name": "is_profitable",
+          "derived_from": [],
+          "expression": "F.when(F.col('margin') > 0, F.lit(True)).otherwise(F.lit(False))",
+          "transformation": "withColumn"
+        },
+        {
+          "name": "margin",
+          "derived_from": [],
+          "expression": "F.col('big_amount') - F.col('price')",
+          "transformation": "withColumn"
+        }
+      ]
+    }
+  ],
+  "assets": {
+    "reads": [
+      {
+        "format": "parquet",
+        "path": "s3a://mybucket/curated/customer_agg/"
+      },
+      {
+        "format": "parquet",
+        "path": "s3a://mybucket/ref/products.parquet"
+      }
+    ],
+    "writes": [
+      {
+        "format": "parquet",
+        "path": "s3a://mybucket/stage/cust_products/",
+        "df": "parquet"
+      }
+    ]
+  }
+}
