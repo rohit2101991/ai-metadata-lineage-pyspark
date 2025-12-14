@@ -165,7 +165,7 @@
       {
         "df": "dfAgg",
         "col": "big_amount",
-        "expression": "total_amount + total_revenue",
+        "expression": "col('total_amount') + col('total_revenue')",
         "source_cols": [
           "total_amount",
           "total_revenue"

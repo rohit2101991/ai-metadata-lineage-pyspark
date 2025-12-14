@@ -1,7 +1,7 @@
 [
   {
     "id": "db1fe98d019b26fd9ce4061b9ed3b8a7b92f06f1",
-    "text": "SCRIPT: script_01_bronze_ingest_orders.py\nSOURCE_FILE: script_01_bronze_ingest_orders.enriched.json",
+    "text": "SCRIPT: script_01_bronze_ingest_orders.py\nSOURCE_FILE: script_01_bronze_ingest_orders.enriched.json\nREADS:\n- option header\nWRITES:\n- df=parquet -> parquet s3a://my-bucket/bronze/orders/\nDATAFRAMES:\n- df\n- df1\n- out\n- spark\n- src",
     "meta": {
       "type": "script",
       "script": "script_01_bronze_ingest_orders.py"
@@ -9,7 +9,7 @@
   },
   {
     "id": "52929a0fd3b1b3597cc50f6a7a8a7f00db819bb8",
-    "text": "SCRIPT: script_01_bronze_ingest_orders.py\nDATAFRAME: df1\nDERIVED_COLUMN: order_ts\nEXPRESSION: F.to_timestamp(\"order_ts\")\nSOURCE_COLUMNS: ['order_ts']",
+    "text": "SCRIPT: script_01_bronze_ingest_orders.py\nDATAFRAME: df1\nDERIVED_COLUMN: order_ts\nEXPRESSION: F.to_timestamp('order_ts')\nSOURCE_COLUMNS: ['order_ts']",
     "meta": {
       "type": "derived",
       "script": "script_01_bronze_ingest_orders.py",
@@ -19,7 +19,7 @@
   },
   {
     "id": "ca4d1ddd07492739e31f60db77683018e991df57",
-    "text": "SCRIPT: script_01_bronze_ingest_orders.py\nDATAFRAME: df1\nDERIVED_COLUMN: order_date\nEXPRESSION: F.to_date(\"order_ts\")\nSOURCE_COLUMNS: ['order_ts']",
+    "text": "SCRIPT: script_01_bronze_ingest_orders.py\nDATAFRAME: df1\nDERIVED_COLUMN: order_date\nEXPRESSION: F.to_date('order_ts')\nSOURCE_COLUMNS: ['order_ts']",
     "meta": {
       "type": "derived",
       "script": "script_01_bronze_ingest_orders.py",
@@ -29,7 +29,7 @@
   },
   {
     "id": "b2efce73c15c5db77b8d62fa529b3e59569c375f",
-    "text": "SCRIPT: script_01_bronze_ingest_orders.py\nDATAFRAME: df1\nDERIVED_COLUMN: customer_id\nEXPRESSION: F.col(\"customer_id\").cast(\"string\")\nSOURCE_COLUMNS: ['customer_id']",
+    "text": "SCRIPT: script_01_bronze_ingest_orders.py\nDATAFRAME: df1\nDERIVED_COLUMN: customer_id\nEXPRESSION: F.col('customer_id').cast('string')\nSOURCE_COLUMNS: ['customer_id']",
     "meta": {
       "type": "derived",
       "script": "script_01_bronze_ingest_orders.py",
@@ -39,7 +39,7 @@
   },
   {
     "id": "d530913322bc600a19c7871f4d53c6ff044c3213",
-    "text": "SCRIPT: script_01_bronze_ingest_orders.py\nDATAFRAME: df1\nDERIVED_COLUMN: order_id\nEXPRESSION: F.col(\"order_id\").cast(\"string\")\nSOURCE_COLUMNS: ['order_id']",
+    "text": "SCRIPT: script_01_bronze_ingest_orders.py\nDATAFRAME: df1\nDERIVED_COLUMN: order_id\nEXPRESSION: F.col('order_id').cast('string')\nSOURCE_COLUMNS: ['order_id']",
     "meta": {
       "type": "derived",
       "script": "script_01_bronze_ingest_orders.py",
@@ -49,7 +49,7 @@
   },
   {
     "id": "d34890f771274f416171cffe9a7074fa30b93fe9",
-    "text": "SCRIPT: script_01_bronze_ingest_orders.py\nDATAFRAME: df1\nDERIVED_COLUMN: amount\nEXPRESSION: F.coalesce(F.col(\"amount\").cast(\"double\"), F.lit(0.0))\nSOURCE_COLUMNS: ['amount']",
+    "text": "SCRIPT: script_01_bronze_ingest_orders.py\nDATAFRAME: df1\nDERIVED_COLUMN: amount\nEXPRESSION: F.coalesce(F.col('amount').cast('double'), F.lit(0.0))\nSOURCE_COLUMNS: ['amount']",
     "meta": {
       "type": "derived",
       "script": "script_01_bronze_ingest_orders.py",
@@ -59,7 +59,7 @@
   },
   {
     "id": "82b183000a1d31de98f68706c1b0d0da0e2da215",
-    "text": "SCRIPT: script_01_bronze_ingest_orders.py\nDATAFRAME: df1\nDERIVED_COLUMN: currency\nEXPRESSION: F.upper(F.coalesce(F.col(\"currency\"), F.lit(\"USD\")))\nSOURCE_COLUMNS: ['currency']",
+    "text": "SCRIPT: script_01_bronze_ingest_orders.py\nDATAFRAME: df1\nDERIVED_COLUMN: currency\nEXPRESSION: F.upper(F.coalesce(F.col('currency'), F.lit('USD')))\nSOURCE_COLUMNS: ['currency']",
     "meta": {
       "type": "derived",
       "script": "script_01_bronze_ingest_orders.py",
@@ -69,7 +69,7 @@
   },
   {
     "id": "21e4700c26c8b4d135e217dcfdc4528cff8d97c5",
-    "text": "SCRIPT: script_01_bronze_ingest_orders.py\nDATAFRAME: df1\nDERIVED_COLUMN: channel\nEXPRESSION: F.lower(F.coalesce(F.col(\"channel\"), F.lit(\"unknown\")))\nSOURCE_COLUMNS: ['channel']",
+    "text": "SCRIPT: script_01_bronze_ingest_orders.py\nDATAFRAME: df1\nDERIVED_COLUMN: channel\nEXPRESSION: F.lower(F.coalesce(F.col('channel'), F.lit('unknown')))\nSOURCE_COLUMNS: ['channel']",
     "meta": {
       "type": "derived",
       "script": "script_01_bronze_ingest_orders.py",
@@ -79,7 +79,7 @@
   },
   {
     "id": "dcf5b3e17da615bb2f3cb92d2f01e39935075aa2",
-    "text": "SCRIPT: script_01_bronze_ingest_orders.py\nDATAFRAME: df1\nDERIVED_COLUMN: country\nEXPRESSION: F.upper(F.coalesce(F.col(\"country\"), F.lit(\"US\")))\nSOURCE_COLUMNS: ['country']",
+    "text": "SCRIPT: script_01_bronze_ingest_orders.py\nDATAFRAME: df1\nDERIVED_COLUMN: country\nEXPRESSION: F.upper(F.coalesce(F.col('country'), F.lit('US')))\nSOURCE_COLUMNS: ['country']",
     "meta": {
       "type": "derived",
       "script": "script_01_bronze_ingest_orders.py",
@@ -89,7 +89,7 @@
   },
   {
     "id": "c5e68a363d3ebb2cd020d0d0b43fe95a0c44a77f",
-    "text": "SCRIPT: script_01_bronze_ingest_orders.py\nDATAFRAME: df1\nDERIVED_COLUMN: is_refund\nEXPRESSION: F.when(F.col(\"amount\") < 0, F.lit(1)).otherwise(F.lit(0))\nSOURCE_COLUMNS: ['amount']",
+    "text": "SCRIPT: script_01_bronze_ingest_orders.py\nDATAFRAME: df1\nDERIVED_COLUMN: is_refund\nEXPRESSION: F.when(F.col('amount') < 0, F.lit(1)).otherwise(F.lit(0))\nSOURCE_COLUMNS: ['amount']",
     "meta": {
       "type": "derived",
       "script": "script_01_bronze_ingest_orders.py",
@@ -99,7 +99,7 @@
   },
   {
     "id": "5e4f769273feb892ce0016e44e2a5f5c6013b050",
-    "text": "SCRIPT: script_01_bronze_ingest_orders.py\nDATAFRAME: df1\nDERIVED_COLUMN: abs_amount\nEXPRESSION: F.abs(F.col(\"amount\"))\nSOURCE_COLUMNS: ['amount']",
+    "text": "SCRIPT: script_01_bronze_ingest_orders.py\nDATAFRAME: df1\nDERIVED_COLUMN: abs_amount\nEXPRESSION: F.abs(F.col('amount'))\nSOURCE_COLUMNS: ['amount']",
     "meta": {
       "type": "derived",
       "script": "script_01_bronze_ingest_orders.py",
@@ -109,123 +109,123 @@
   },
   {
     "id": "e0cc6b72b8577b391b523045dfdb7887ba760286",
-    "text": "SCRIPT: script_02_dim_customer_latest.py\nSOURCE_FILE: script_02_dim_customer_latest.enriched.json",
+    "text": "SCRIPT: script_02_dim_customer_latest.py\nSOURCE_FILE: script_02_dim_customer_latest.enriched.json\nREADS:\n- parquet s3a://my-bucket/raw/customers/\nWRITES:\n- df=parquet -> parquet s3a://my-bucket/silver/dim_customer/\nDATAFRAMES:\n- df\n- df2\n- out\n- spark\n- src\n- w",
     "meta": {
       "type": "script",
       "script": "script_02_dim_customer_latest.py"
     }
   },
   {
-    "id": "3dd6957f308b62dcd74c448ad350b7d55b2e2db7",
-    "text": "SCRIPT: script_02_dim_customer_latest.py\nDATAFRAME: df\nDERIVED_COLUMN: rn\nEXPRESSION: F.row_number().over(w)\nSOURCE_COLUMNS: []",
+    "id": "e05a3470ca8aa8d436130752fc384d6e46e4438a",
+    "text": "SCRIPT: script_02_dim_customer_latest.py\nDATAFRAME: df2\nDERIVED_COLUMN: email_domain\nEXPRESSION: F.lower(F.regexp_extract(F.col('email'), '@(.+)$', 1))\nSOURCE_COLUMNS: ['email']",
     "meta": {
       "type": "derived",
       "script": "script_02_dim_customer_latest.py",
-      "df": "df",
-      "column": "rn"
-    }
-  },
-  {
-    "id": "1d5a9564f8526ee4de8f9a06f1cd7f597346c570",
-    "text": "SCRIPT: script_02_dim_customer_latest.py\nDATAFRAME: df\nDERIVED_COLUMN: rnk\nEXPRESSION: F.rank().over(w)\nSOURCE_COLUMNS: []",
-    "meta": {
-      "type": "derived",
-      "script": "script_02_dim_customer_latest.py",
-      "df": "df",
-      "column": "rnk"
-    }
-  },
-  {
-    "id": "01652d73728bc05b8a36cdb8481f44e4ae5268bc",
-    "text": "SCRIPT: script_02_dim_customer_latest.py\nDATAFRAME: df\nDERIVED_COLUMN: drnk\nEXPRESSION: F.dense_rank().over(w)\nSOURCE_COLUMNS: []",
-    "meta": {
-      "type": "derived",
-      "script": "script_02_dim_customer_latest.py",
-      "df": "df",
-      "column": "drnk"
-    }
-  },
-  {
-    "id": "65d47048d3f66bd5ed097e2b0e130efbc9783a98",
-    "text": "SCRIPT: script_02_dim_customer_latest.py\nDATAFRAME: df\nDERIVED_COLUMN: customer_tier\nEXPRESSION: F.when(F.col(\"lifetime_value\") >= 10000, \"platinum\").when(F.col(\"lifetime_value\") >= 5000, \"gold\").when(F.col(\"lifetime_value\") >= 1000, \"silver\").otherwise(\"bronze\")\nSOURCE_COLUMNS: ['lifetime_value']",
-    "meta": {
-      "type": "derived",
-      "script": "script_02_dim_customer_latest.py",
-      "df": "df",
-      "column": "customer_tier"
-    }
-  },
-  {
-    "id": "b8c21ef75e9c988b4adee9260c77b3cdc3e1403e",
-    "text": "SCRIPT: script_02_dim_customer_latest.py\nDATAFRAME: df\nDERIVED_COLUMN: email_domain\nEXPRESSION: F.lower(F.regexp_extract(F.col(\"email\"), r\"@(.+)$\", 1))\nSOURCE_COLUMNS: ['email']",
-    "meta": {
-      "type": "derived",
-      "script": "script_02_dim_customer_latest.py",
-      "df": "df",
+      "df": "df2",
       "column": "email_domain"
     }
   },
   {
+    "id": "029863168784e10dcb45e3c837a130c8589cfb28",
+    "text": "SCRIPT: script_02_dim_customer_latest.py\nDATAFRAME: df2\nDERIVED_COLUMN: customer_tier\nEXPRESSION: F.when(F.col('lifetime_value') >= 10000, 'platinum').when(F.col('lifetime_value') >= 5000, 'gold').when(F.col('lifetime_value') >= 1000,'silver').otherwise('bronze')\nSOURCE_COLUMNS: ['lifetime_value']",
+    "meta": {
+      "type": "derived",
+      "script": "script_02_dim_customer_latest.py",
+      "df": "df2",
+      "column": "customer_tier"
+    }
+  },
+  {
+    "id": "d2c6efbc18e539f5ef8ea84fc3639653ae2a0012",
+    "text": "SCRIPT: script_02_dim_customer_latest.py\nDATAFRAME: df2\nDERIVED_COLUMN: drnk\nEXPRESSION: F.dense_rank().over(w)\nSOURCE_COLUMNS: []",
+    "meta": {
+      "type": "derived",
+      "script": "script_02_dim_customer_latest.py",
+      "df": "df2",
+      "column": "drnk"
+    }
+  },
+  {
+    "id": "815ca36a2311b920680607351709a2359e775087",
+    "text": "SCRIPT: script_02_dim_customer_latest.py\nDATAFRAME: df2\nDERIVED_COLUMN: rnk\nEXPRESSION: F.rank().over(w)\nSOURCE_COLUMNS: []",
+    "meta": {
+      "type": "derived",
+      "script": "script_02_dim_customer_latest.py",
+      "df": "df2",
+      "column": "rnk"
+    }
+  },
+  {
+    "id": "aa230efb74407b21a4e57587569043041835d335",
+    "text": "SCRIPT: script_02_dim_customer_latest.py\nDATAFRAME: df2\nDERIVED_COLUMN: rn\nEXPRESSION: F.row_number().over(w)\nSOURCE_COLUMNS: []",
+    "meta": {
+      "type": "derived",
+      "script": "script_02_dim_customer_latest.py",
+      "df": "df2",
+      "column": "rn"
+    }
+  },
+  {
     "id": "a2c47c2a287342c0c2ef29ff60837c9564b4c7e7",
-    "text": "SCRIPT: script_03_fact_orders_enriched.py\nSOURCE_FILE: script_03_fact_orders_enriched.enriched.json",
+    "text": "SCRIPT: script_03_fact_orders_enriched.py\nSOURCE_FILE: script_03_fact_orders_enriched.enriched.json\nREADS:\n- parquet s3a://my-bucket/bronze/orders/\n- parquet s3a://my-bucket/silver/dim_customer/\nWRITES:\n- df=parquet -> parquet s3a://my-bucket/gold/fact_orders_enriched/\nDATAFRAMES:\n- df\n- df2\n- dim_cust\n- orders\n- out\n- spark\n- w",
     "meta": {
       "type": "script",
       "script": "script_03_fact_orders_enriched.py"
     }
   },
   {
-    "id": "952e24a9f959e5e7b2ed4768a116a2b68060f8a2",
-    "text": "SCRIPT: script_03_fact_orders_enriched.py\nDATAFRAME: df\nDERIVED_COLUMN: prev_amount\nEXPRESSION: lag(abs_amount, 1) OVER (PARTITION BY customer_id ORDER BY order_ts ASC)\nSOURCE_COLUMNS: ['abs_amount']",
+    "id": "f7f3975f77fd5abe6075788aca7caf0f217724d5",
+    "text": "SCRIPT: script_03_fact_orders_enriched.py\nDATAFRAME: df2\nDERIVED_COLUMN: prev_amount\nEXPRESSION: F.lag('abs_amount', 1).over(w)\nSOURCE_COLUMNS: ['abs_amount']",
     "meta": {
       "type": "derived",
       "script": "script_03_fact_orders_enriched.py",
-      "df": "df",
+      "df": "df2",
       "column": "prev_amount"
     }
   },
   {
-    "id": "26311357b38bd02c419a7d72b4c7730618bba00a",
-    "text": "SCRIPT: script_03_fact_orders_enriched.py\nDATAFRAME: df\nDERIVED_COLUMN: next_amount\nEXPRESSION: lead(abs_amount, 1) OVER (PARTITION BY customer_id ORDER BY order_ts ASC)\nSOURCE_COLUMNS: ['abs_amount']",
+    "id": "621c8afd1775ea0b5d386ff71b8202dda04dc8cb",
+    "text": "SCRIPT: script_03_fact_orders_enriched.py\nDATAFRAME: df2\nDERIVED_COLUMN: next_amount\nEXPRESSION: F.lead('abs_amount', 1).over(w)\nSOURCE_COLUMNS: ['abs_amount']",
     "meta": {
       "type": "derived",
       "script": "script_03_fact_orders_enriched.py",
-      "df": "df",
+      "df": "df2",
       "column": "next_amount"
     }
   },
   {
-    "id": "7757947b0e0e39dbc7eff689d40f215b0695cf5e",
-    "text": "SCRIPT: script_03_fact_orders_enriched.py\nDATAFRAME: df\nDERIVED_COLUMN: amount_delta_prev\nEXPRESSION: abs_amount - COALESCE(prev_amount, 0.0)\nSOURCE_COLUMNS: ['abs_amount', 'prev_amount']",
+    "id": "1ecad195a4a0185a6c29b4f8008ce39607c88a0c",
+    "text": "SCRIPT: script_03_fact_orders_enriched.py\nDATAFRAME: df2\nDERIVED_COLUMN: amount_delta_prev\nEXPRESSION: F.col('abs_amount') - F.coalesce(F.col('prev_amount'), F.lit(0.0))\nSOURCE_COLUMNS: ['abs_amount', 'prev_amount']",
     "meta": {
       "type": "derived",
       "script": "script_03_fact_orders_enriched.py",
-      "df": "df",
+      "df": "df2",
       "column": "amount_delta_prev"
     }
   },
   {
-    "id": "fe80ae8e1fc156e8fa4218cfa8e0c41255124fd5",
-    "text": "SCRIPT: script_03_fact_orders_enriched.py\nDATAFRAME: df\nDERIVED_COLUMN: rolling_7_orders_sum\nEXPRESSION: SUM(abs_amount) OVER (PARTITION BY customer_id ORDER BY order_ts ASC ROWS BETWEEN 7 PRECEDING AND CURRENT ROW)\nSOURCE_COLUMNS: ['abs_amount']",
+    "id": "19a940d5a3824d0376ae34c4c2dfa718e23e08a7",
+    "text": "SCRIPT: script_03_fact_orders_enriched.py\nDATAFRAME: df2\nDERIVED_COLUMN: rolling_7_orders_sum\nEXPRESSION: F.sum('abs_amount').over(w.rowsBetween(-6, 0))\nSOURCE_COLUMNS: ['abs_amount']",
     "meta": {
       "type": "derived",
       "script": "script_03_fact_orders_enriched.py",
-      "df": "df",
+      "df": "df2",
       "column": "rolling_7_orders_sum"
     }
   },
   {
-    "id": "ae35dacb8844434d01ab6db0f141b9e149fad900",
-    "text": "SCRIPT: script_03_fact_orders_enriched.py\nDATAFRAME: df\nDERIVED_COLUMN: rolling_30_orders_sum\nEXPRESSION: SUM(abs_amount) OVER (PARTITION BY customer_id ORDER BY order_ts ASC ROWS BETWEEN 30 PRECEDING AND CURRENT ROW)\nSOURCE_COLUMNS: ['abs_amount']",
+    "id": "1bd209c2101514d3ea05aff27b45afad76a30b04",
+    "text": "SCRIPT: script_03_fact_orders_enriched.py\nDATAFRAME: df2\nDERIVED_COLUMN: rolling_30_orders_sum\nEXPRESSION: F.sum('abs_amount').over(w.rowsBetween(-29, 0))\nSOURCE_COLUMNS: ['abs_amount']",
     "meta": {
       "type": "derived",
       "script": "script_03_fact_orders_enriched.py",
-      "df": "df",
+      "df": "df2",
       "column": "rolling_30_orders_sum"
     }
   },
   {
-    "id": "8442811b461524903a91827f606312e359560f9a",
-    "text": "SCRIPT: script_03_fact_orders_enriched.py\nRESULT_DF: df\nJOIN: o left JOIN c\nON: ['customer_id']",
+    "id": "0fbb6278f2c67df32512f065ff2c64e4d595347b",
+    "text": "SCRIPT: script_03_fact_orders_enriched.py\nRESULT_DF: df\nJOIN: orders left JOIN dim_cust\nON: ['customer_id']",
     "meta": {
       "type": "join",
       "script": "script_03_fact_orders_enriched.py",
@@ -234,7 +234,7 @@
   },
   {
     "id": "21f2be61688a7175ff03a155c6e2bc57c7024dda",
-    "text": "SCRIPT: script_04_dim_product_sql_cte.py\nSOURCE_FILE: script_04_dim_product_sql_cte.enriched.json",
+    "text": "SCRIPT: script_04_dim_product_sql_cte.py\nSOURCE_FILE: script_04_dim_product_sql_cte.enriched.json\nREADS:\n- parquet s3a://my-bucket/raw/products/\nWRITES:\n- df=df -> createOrReplaceTempView raw_products\n- df=parquet -> parquet s3a://my-bucket/silver/dim_product/\nDATAFRAMES:\n- df\n- dim_prod\n- out\n- spark\n- sql\n- src",
     "meta": {
       "type": "script",
       "script": "script_04_dim_product_sql_cte.py"
@@ -242,7 +242,7 @@
   },
   {
     "id": "c6f77b995b461aff1beb8ca550d900878f61b8ee",
-    "text": "SCRIPT: script_05_sales_margin_rank.py\nSOURCE_FILE: script_05_sales_margin_rank.enriched.json",
+    "text": "SCRIPT: script_05_sales_margin_rank.py\nSOURCE_FILE: script_05_sales_margin_rank.enriched.json\nREADS:\n- parquet s3a://my-bucket/gold/fact_orders_enriched/\n- parquet s3a://my-bucket/silver/dim_product/\n- parquet s3a://my-bucket/raw/order_items/\nWRITES:\n- df=parquet -> parquet s3a://my-bucket/gold/sales_margin_ranked/\nDATAFRAMES:\n- df\n- df2\n- dim_prod\n- fact\n- line_items\n- out\n- spark\n- w",
     "meta": {
       "type": "script",
       "script": "script_05_sales_margin_rank.py"
@@ -250,7 +250,7 @@
   },
   {
     "id": "f99def555e9997fa4450dd75d9e48b911167ea3a",
-    "text": "SCRIPT: script_05_sales_margin_rank.py\nDATAFRAME: df\nDERIVED_COLUMN: gross_sales\nEXPRESSION: f.abs_amount\nSOURCE_COLUMNS: ['f.abs_amount']",
+    "text": "SCRIPT: script_05_sales_margin_rank.py\nDATAFRAME: df\nDERIVED_COLUMN: gross_sales\nEXPRESSION: F.col('f.abs_amount')\nSOURCE_COLUMNS: []",
     "meta": {
       "type": "derived",
       "script": "script_05_sales_margin_rank.py",
@@ -260,7 +260,7 @@
   },
   {
     "id": "81203df9534f322df86aa15841d77a597aaa325e",
-    "text": "SCRIPT: script_05_sales_margin_rank.py\nDATAFRAME: df\nDERIVED_COLUMN: qty\nEXPRESSION: coalesce(i.qty.cast(\"int\"), lit(1))\nSOURCE_COLUMNS: ['i.qty']",
+    "text": "SCRIPT: script_05_sales_margin_rank.py\nDATAFRAME: df\nDERIVED_COLUMN: qty\nEXPRESSION: F.coalesce(F.col('qty').cast('int'), F.lit(1))\nSOURCE_COLUMNS: []",
     "meta": {
       "type": "derived",
       "script": "script_05_sales_margin_rank.py",
@@ -270,7 +270,7 @@
   },
   {
     "id": "b4dd1078a2cea9191e0f323a7ca88813ae8764b5",
-    "text": "SCRIPT: script_05_sales_margin_rank.py\nDATAFRAME: df\nDERIVED_COLUMN: est_cost\nEXPRESSION: qty * coalesce(p.cost, lit(0.0))\nSOURCE_COLUMNS: ['qty', 'p.cost']",
+    "text": "SCRIPT: script_05_sales_margin_rank.py\nDATAFRAME: df\nDERIVED_COLUMN: est_cost\nEXPRESSION: F.col('qty') * F.coalesce(F.col('p.cost'), F.lit(0.0))\nSOURCE_COLUMNS: []",
     "meta": {
       "type": "derived",
       "script": "script_05_sales_margin_rank.py",
@@ -280,7 +280,7 @@
   },
   {
     "id": "8c7cc7159cee20d555c2ee40c45adfb0d92bebb0",
-    "text": "SCRIPT: script_05_sales_margin_rank.py\nDATAFRAME: df\nDERIVED_COLUMN: est_margin\nEXPRESSION: gross_sales - est_cost\nSOURCE_COLUMNS: ['gross_sales', 'est_cost']",
+    "text": "SCRIPT: script_05_sales_margin_rank.py\nDATAFRAME: df\nDERIVED_COLUMN: est_margin\nEXPRESSION: F.col('gross_sales') - F.col('est_cost')\nSOURCE_COLUMNS: []",
     "meta": {
       "type": "derived",
       "script": "script_05_sales_margin_rank.py",
@@ -290,7 +290,7 @@
   },
   {
     "id": "ac52223ce1db2f96bcef4365586fc245fae07f55",
-    "text": "SCRIPT: script_05_sales_margin_rank.py\nDATAFRAME: df\nDERIVED_COLUMN: est_margin_pct\nEXPRESSION: when(gross_sales == 0, lit(None)).otherwise(est_margin / gross_sales)\nSOURCE_COLUMNS: ['gross_sales', 'est_margin']",
+    "text": "SCRIPT: script_05_sales_margin_rank.py\nDATAFRAME: df\nDERIVED_COLUMN: est_margin_pct\nEXPRESSION: F.when(F.col('gross_sales') == 0, F.lit(None)).otherwise(F.col('est_margin') / F.col('gross_sales'))\nSOURCE_COLUMNS: []",
     "meta": {
       "type": "derived",
       "script": "script_05_sales_margin_rank.py",
@@ -300,7 +300,7 @@
   },
   {
     "id": "aa5b0c31d2abbec761122612609ed20cff0dc14b",
-    "text": "SCRIPT: script_05_sales_margin_rank.py\nDATAFRAME: df2\nDERIVED_COLUMN: margin_rank_day\nEXPRESSION: rank().over(w)\nSOURCE_COLUMNS: []",
+    "text": "SCRIPT: script_05_sales_margin_rank.py\nDATAFRAME: df2\nDERIVED_COLUMN: margin_rank_day\nEXPRESSION: F.rank().over(w)\nSOURCE_COLUMNS: []",
     "meta": {
       "type": "derived",
       "script": "script_05_sales_margin_rank.py",
@@ -310,7 +310,7 @@
   },
   {
     "id": "9f8253b71bbb5b4f1759871fe44930a057e7c2d7",
-    "text": "SCRIPT: script_05_sales_margin_rank.py\nDATAFRAME: df2\nDERIVED_COLUMN: margin_dense_rank_day\nEXPRESSION: dense_rank().over(w)\nSOURCE_COLUMNS: []",
+    "text": "SCRIPT: script_05_sales_margin_rank.py\nDATAFRAME: df2\nDERIVED_COLUMN: margin_dense_rank_day\nEXPRESSION: F.dense_rank().over(w)\nSOURCE_COLUMNS: []",
     "meta": {
       "type": "derived",
       "script": "script_05_sales_margin_rank.py",
@@ -320,7 +320,7 @@
   },
   {
     "id": "8fc74b294ae5eeaec4708b371ff88839954d73ca",
-    "text": "SCRIPT: script_05_sales_margin_rank.py\nDATAFRAME: df2\nDERIVED_COLUMN: top_10_flag\nEXPRESSION: when(margin_rank_day <= 10, 1).otherwise(0)\nSOURCE_COLUMNS: ['margin_rank_day']",
+    "text": "SCRIPT: script_05_sales_margin_rank.py\nDATAFRAME: df2\nDERIVED_COLUMN: top_10_flag\nEXPRESSION: F.when(F.col('margin_rank_day') <= 10, 1).otherwise(0)\nSOURCE_COLUMNS: []",
     "meta": {
       "type": "derived",
       "script": "script_05_sales_margin_rank.py",
@@ -348,55 +348,55 @@
   },
   {
     "id": "df7ca758da4aac619c24503c47d37e661b59cb0b",
-    "text": "SCRIPT: script_06_web_sessionization.py\nSOURCE_FILE: script_06_web_sessionization.enriched.json",
+    "text": "SCRIPT: script_06_web_sessionization.py\nSOURCE_FILE: script_06_web_sessionization.enriched.json\nREADS:\n- parquet s3a://my-bucket/raw/web_clicks/\nWRITES:\n- df=df6 -> createOrReplaceTempView sessions\n- df=parquet -> parquet s3a://my-bucket/gold/web_sessions/\nDATAFRAMES:\n- agg_sql\n- clicks\n- df\n- df2\n- df3\n- df4\n- df5\n- df6\n- out\n- sess_agg\n- spark\n- w",
     "meta": {
       "type": "script",
       "script": "script_06_web_sessionization.py"
     }
   },
   {
-    "id": "93bd901485e52b48b59c56419fd8d432c61db23f",
-    "text": "SCRIPT: script_06_web_sessionization.py\nDATAFRAME: clicks\nDERIVED_COLUMN: event_ts\nEXPRESSION: to_timestamp(event_ts)\nSOURCE_COLUMNS: ['event_ts']",
+    "id": "acd17de56378225b7a10bf7710574a96f6b7b79b",
+    "text": "SCRIPT: script_06_web_sessionization.py\nDATAFRAME: df\nDERIVED_COLUMN: ref_host\nEXPRESSION: F.regexp_extract(F.col('referrer'), 'https?://([^/]+)/', 1)\nSOURCE_COLUMNS: ['referrer']",
     "meta": {
       "type": "derived",
       "script": "script_06_web_sessionization.py",
-      "df": "clicks",
-      "column": "event_ts"
-    }
-  },
-  {
-    "id": "d7e2626702893d991bafcd767aa76121dac83dfc",
-    "text": "SCRIPT: script_06_web_sessionization.py\nDATAFRAME: clicks\nDERIVED_COLUMN: event_date\nEXPRESSION: to_date(event_ts)\nSOURCE_COLUMNS: ['event_ts']",
-    "meta": {
-      "type": "derived",
-      "script": "script_06_web_sessionization.py",
-      "df": "clicks",
-      "column": "event_date"
-    }
-  },
-  {
-    "id": "023619bf7a3a2f330357667b0eb27a9d35108890",
-    "text": "SCRIPT: script_06_web_sessionization.py\nDATAFRAME: clicks\nDERIVED_COLUMN: url_host\nEXPRESSION: regexp_extract(url, 'https?://([^/]+)/', 1)\nSOURCE_COLUMNS: ['url']",
-    "meta": {
-      "type": "derived",
-      "script": "script_06_web_sessionization.py",
-      "df": "clicks",
-      "column": "url_host"
-    }
-  },
-  {
-    "id": "b03d26e1e445e92d5e53899ccd7ff9693913b6db",
-    "text": "SCRIPT: script_06_web_sessionization.py\nDATAFRAME: clicks\nDERIVED_COLUMN: ref_host\nEXPRESSION: regexp_extract(referrer, 'https?://([^/]+)/', 1)\nSOURCE_COLUMNS: ['referrer']",
-    "meta": {
-      "type": "derived",
-      "script": "script_06_web_sessionization.py",
-      "df": "clicks",
+      "df": "df",
       "column": "ref_host"
     }
   },
   {
+    "id": "4b8037cc0779868a4e6325f4cd9527b262a079a0",
+    "text": "SCRIPT: script_06_web_sessionization.py\nDATAFRAME: df\nDERIVED_COLUMN: url_host\nEXPRESSION: F.regexp_extract(F.col('url'), 'https?://([^/]+)/', 1)\nSOURCE_COLUMNS: ['url']",
+    "meta": {
+      "type": "derived",
+      "script": "script_06_web_sessionization.py",
+      "df": "df",
+      "column": "url_host"
+    }
+  },
+  {
+    "id": "6e096b656c9b4f2f7e6b1f03f7fea5cba3cc6d28",
+    "text": "SCRIPT: script_06_web_sessionization.py\nDATAFRAME: df\nDERIVED_COLUMN: event_date\nEXPRESSION: F.to_date('event_ts')\nSOURCE_COLUMNS: ['event_ts']",
+    "meta": {
+      "type": "derived",
+      "script": "script_06_web_sessionization.py",
+      "df": "df",
+      "column": "event_date"
+    }
+  },
+  {
+    "id": "904ab309fa515dffe66438011fe229d597f4bbbd",
+    "text": "SCRIPT: script_06_web_sessionization.py\nDATAFRAME: df\nDERIVED_COLUMN: event_ts\nEXPRESSION: F.to_timestamp('event_ts')\nSOURCE_COLUMNS: ['event_ts']",
+    "meta": {
+      "type": "derived",
+      "script": "script_06_web_sessionization.py",
+      "df": "df",
+      "column": "event_ts"
+    }
+  },
+  {
     "id": "0f0ea1bb0dd17a126ce8344db5a2859be6b06423",
-    "text": "SCRIPT: script_06_web_sessionization.py\nDATAFRAME: df2\nDERIVED_COLUMN: prev_ts\nEXPRESSION: lag(event_ts).over(w)\nSOURCE_COLUMNS: ['event_ts']",
+    "text": "SCRIPT: script_06_web_sessionization.py\nDATAFRAME: df2\nDERIVED_COLUMN: prev_ts\nEXPRESSION: F.lag('event_ts').over(w)\nSOURCE_COLUMNS: ['event_ts']",
     "meta": {
       "type": "derived",
       "script": "script_06_web_sessionization.py",
@@ -406,7 +406,7 @@
   },
   {
     "id": "fea172c0aceb1ba19dd7ee715d7ab8a38b535494",
-    "text": "SCRIPT: script_06_web_sessionization.py\nDATAFRAME: df3\nDERIVED_COLUMN: gap_min\nEXPRESSION: (col(event_ts).cast('long') - col(prev_ts).cast('long')) / 60.0\nSOURCE_COLUMNS: ['event_ts', 'prev_ts']",
+    "text": "SCRIPT: script_06_web_sessionization.py\nDATAFRAME: df3\nDERIVED_COLUMN: gap_min\nEXPRESSION: (F.col('event_ts').cast('long') - F.col('prev_ts').cast('long')) / 60.0\nSOURCE_COLUMNS: ['event_ts', 'prev_ts']",
     "meta": {
       "type": "derived",
       "script": "script_06_web_sessionization.py",
@@ -416,7 +416,7 @@
   },
   {
     "id": "116254e6b18feb6df84c708e916b42678849319d",
-    "text": "SCRIPT: script_06_web_sessionization.py\nDATAFRAME: df4\nDERIVED_COLUMN: new_session_flag\nEXPRESSION: when((col(gap_min).isNull()) | (col(gap_min) > 30), 1).otherwise(0)\nSOURCE_COLUMNS: ['gap_min']",
+    "text": "SCRIPT: script_06_web_sessionization.py\nDATAFRAME: df4\nDERIVED_COLUMN: new_session_flag\nEXPRESSION: F.when(F.col('gap_min').isNull() | (F.col('gap_min') > 30), 1).otherwise(0)\nSOURCE_COLUMNS: ['gap_min']",
     "meta": {
       "type": "derived",
       "script": "script_06_web_sessionization.py",
@@ -426,7 +426,7 @@
   },
   {
     "id": "f9aba64bff403f79072b281c8c752382e9be6b8a",
-    "text": "SCRIPT: script_06_web_sessionization.py\nDATAFRAME: df5\nDERIVED_COLUMN: session_num\nEXPRESSION: sum(new_session_flag).over(w)\nSOURCE_COLUMNS: ['new_session_flag']",
+    "text": "SCRIPT: script_06_web_sessionization.py\nDATAFRAME: df5\nDERIVED_COLUMN: session_num\nEXPRESSION: F.sum('new_session_flag').over(w)\nSOURCE_COLUMNS: ['new_session_flag']",
     "meta": {
       "type": "derived",
       "script": "script_06_web_sessionization.py",
@@ -436,7 +436,7 @@
   },
   {
     "id": "97f159ef240448a11c5d194886ada2d4b264670c",
-    "text": "SCRIPT: script_06_web_sessionization.py\nDATAFRAME: df6\nDERIVED_COLUMN: session_id\nEXPRESSION: concat_ws('-', col(customer_id), col(event_date), col(session_num))\nSOURCE_COLUMNS: ['customer_id', 'event_date', 'session_num']",
+    "text": "SCRIPT: script_06_web_sessionization.py\nDATAFRAME: df6\nDERIVED_COLUMN: session_id\nEXPRESSION: F.concat_ws('-', F.col('customer_id'), F.col('event_date'), F.col('session_num'))\nSOURCE_COLUMNS: ['customer_id', 'event_date', 'session_num']",
     "meta": {
       "type": "derived",
       "script": "script_06_web_sessionization.py",
@@ -445,48 +445,48 @@
     }
   },
   {
-    "id": "cb69bdfdedc25fb687f6504eda5ddd2e8918c051",
-    "text": "SCRIPT: script_06_web_sessionization.py\nDATAFRAME: sessions\nAGGREGATION: MIN(event_ts) AS session_start_ts\nSOURCE_COLUMNS: ['event_ts']",
+    "id": "12817c0a05accdc55290a344c5b8acf02fc89c44",
+    "text": "SCRIPT: script_06_web_sessionization.py\nDATAFRAME: sess_agg\nAGGREGATION: MIN(event_ts) AS session_start_ts\nSOURCE_COLUMNS: ['event_ts']",
     "meta": {
       "type": "aggregation",
       "script": "script_06_web_sessionization.py",
-      "df": "sessions",
+      "df": "sess_agg",
       "column": "session_start_ts"
     }
   },
   {
-    "id": "ea93aae527644447df4e835489c8453092193737",
-    "text": "SCRIPT: script_06_web_sessionization.py\nDATAFRAME: sessions\nAGGREGATION: MAX(event_ts) AS session_end_ts\nSOURCE_COLUMNS: ['event_ts']",
+    "id": "148e06a1493371b76424bf72afb6626fbf871217",
+    "text": "SCRIPT: script_06_web_sessionization.py\nDATAFRAME: sess_agg\nAGGREGATION: MAX(event_ts) AS session_end_ts\nSOURCE_COLUMNS: ['event_ts']",
     "meta": {
       "type": "aggregation",
       "script": "script_06_web_sessionization.py",
-      "df": "sessions",
+      "df": "sess_agg",
       "column": "session_end_ts"
     }
   },
   {
-    "id": "3c17fb649a3b142285cdaf0cec8805cc17ae39b9",
-    "text": "SCRIPT: script_06_web_sessionization.py\nDATAFRAME: sessions\nAGGREGATION: COUNT(1) AS events\nSOURCE_COLUMNS: ['*']",
+    "id": "396eaf9c8d0de05cc7e88b6e093bf4bddcf0a03f",
+    "text": "SCRIPT: script_06_web_sessionization.py\nDATAFRAME: sess_agg\nAGGREGATION: COUNT(1) AS events\nSOURCE_COLUMNS: ['*']",
     "meta": {
       "type": "aggregation",
       "script": "script_06_web_sessionization.py",
-      "df": "sessions",
+      "df": "sess_agg",
       "column": "events"
     }
   },
   {
-    "id": "0282ca977245294e0f681e319b2bb5b54f6e2208",
-    "text": "SCRIPT: script_06_web_sessionization.py\nDATAFRAME: sessions\nAGGREGATION: COUNT(DISTINCT url_host) AS unique_hosts\nSOURCE_COLUMNS: ['url_host']",
+    "id": "7dc715c904a05272bc0aa9051ad52743d6211c67",
+    "text": "SCRIPT: script_06_web_sessionization.py\nDATAFRAME: sess_agg\nAGGREGATION: COUNT(DISTINCT url_host) AS unique_hosts\nSOURCE_COLUMNS: ['url_host']",
     "meta": {
       "type": "aggregation",
       "script": "script_06_web_sessionization.py",
-      "df": "sessions",
+      "df": "sess_agg",
       "column": "unique_hosts"
     }
   },
   {
     "id": "a9a2a6168272fb9e64523779c0c354616e358283",
-    "text": "SCRIPT: script_07_fraud_scoring.py\nSOURCE_FILE: script_07_fraud_scoring.enriched.json",
+    "text": "SCRIPT: script_07_fraud_scoring.py\nSOURCE_FILE: script_07_fraud_scoring.enriched.json\nREADS:\n- parquet s3a://my-bucket/gold/fact_orders_enriched/\n- parquet s3a://my-bucket/gold/web_sessions/\nWRITES:\n- df=parquet -> parquet s3a://my-bucket/gold/fact_orders_risk_scored/\nDATAFRAMES:\n- df\n- df2\n- fact\n- out\n- sessions\n- spark\n- w",
     "meta": {
       "type": "script",
       "script": "script_07_fraud_scoring.py"
@@ -494,7 +494,7 @@
   },
   {
     "id": "ec9f4ce6939a2e857f55c2873ebd32035a3ce5df",
-    "text": "SCRIPT: script_07_fraud_scoring.py\nDATAFRAME: df\nDERIVED_COLUMN: high_value_flag\nEXPRESSION: when(col(\"f.abs_amount\") >= 500, 1).otherwise(0)\nSOURCE_COLUMNS: ['f.abs_amount']",
+    "text": "SCRIPT: script_07_fraud_scoring.py\nDATAFRAME: df\nDERIVED_COLUMN: high_value_flag\nEXPRESSION: F.when(F.col('f.abs_amount') >= 500, 1).otherwise(0)\nSOURCE_COLUMNS: ['f.abs_amount']",
     "meta": {
       "type": "derived",
       "script": "script_07_fraud_scoring.py",
@@ -504,7 +504,7 @@
   },
   {
     "id": "9e88ffab974fcb57f2a3d5271753b8f2712f1a27",
-    "text": "SCRIPT: script_07_fraud_scoring.py\nDATAFRAME: df\nDERIVED_COLUMN: risk_from_channel\nEXPRESSION: when(col(\"f.channel\").isin(\"unknown\", \"affiliate\"), 2).when(col(\"f.channel\") == \"web\", 1).otherwise(0)\nSOURCE_COLUMNS: ['f.channel']",
+    "text": "SCRIPT: script_07_fraud_scoring.py\nDATAFRAME: df\nDERIVED_COLUMN: risk_from_channel\nEXPRESSION: F.when(F.col('f.channel').isin('unknown', 'affiliate'), 2).when(F.col('f.channel') == 'web', 1).otherwise(0)\nSOURCE_COLUMNS: ['f.channel']",
     "meta": {
       "type": "derived",
       "script": "script_07_fraud_scoring.py",
@@ -514,7 +514,7 @@
   },
   {
     "id": "7529799179932586c4d7634cd162a1c2b9995958",
-    "text": "SCRIPT: script_07_fraud_scoring.py\nDATAFRAME: df\nDERIVED_COLUMN: risk_from_refund\nEXPRESSION: when(col(\"f.is_refund\") == 1, 3).otherwise(0)\nSOURCE_COLUMNS: ['f.is_refund']",
+    "text": "SCRIPT: script_07_fraud_scoring.py\nDATAFRAME: df\nDERIVED_COLUMN: risk_from_refund\nEXPRESSION: F.when(F.col('f.is_refund') == 1, 3).otherwise(0)\nSOURCE_COLUMNS: ['f.is_refund']",
     "meta": {
       "type": "derived",
       "script": "script_07_fraud_scoring.py",
@@ -524,7 +524,7 @@
   },
   {
     "id": "57493b9199c45542174312bc55ce4b2390461ef5",
-    "text": "SCRIPT: script_07_fraud_scoring.py\nDATAFRAME: df\nDERIVED_COLUMN: risk_from_sessions\nEXPRESSION: when(col(\"s.events\") >= 50, 2).when(col(\"s.events\") >= 20, 1).otherwise(0)\nSOURCE_COLUMNS: ['s.events']",
+    "text": "SCRIPT: script_07_fraud_scoring.py\nDATAFRAME: df\nDERIVED_COLUMN: risk_from_sessions\nEXPRESSION: F.when(F.col('s.events') >= 50, 2).when(F.col('s.events') >= 20, 1).otherwise(0)\nSOURCE_COLUMNS: ['s.events']",
     "meta": {
       "type": "derived",
       "script": "script_07_fraud_scoring.py",
@@ -534,7 +534,7 @@
   },
   {
     "id": "ac6acb2a30e9ca02b0d92b7c6c3025dc5effb71b",
-    "text": "SCRIPT: script_07_fraud_scoring.py\nDATAFRAME: df\nDERIVED_COLUMN: raw_risk_score\nEXPRESSION: col(\"high_value_flag\") + col(\"risk_from_channel\") + col(\"risk_from_refund\") + col(\"risk_from_sessions\")\nSOURCE_COLUMNS: ['high_value_flag', 'risk_from_channel', 'risk_from_refund', 'risk_from_sessions']",
+    "text": "SCRIPT: script_07_fraud_scoring.py\nDATAFRAME: df\nDERIVED_COLUMN: raw_risk_score\nEXPRESSION: F.col('high_value_flag') + F.col('risk_from_channel') + F.col('risk_from_refund') + F.col('risk_from_sessions')\nSOURCE_COLUMNS: ['high_value_flag', 'risk_from_channel', 'risk_from_refund', 'risk_from_sessions']",
     "meta": {
       "type": "derived",
       "script": "script_07_fraud_scoring.py",
@@ -544,7 +544,7 @@
   },
   {
     "id": "5ba8c97a236002034804ccbb8e7364f851caba26",
-    "text": "SCRIPT: script_07_fraud_scoring.py\nDATAFRAME: df2\nDERIVED_COLUMN: risk_rank_day\nEXPRESSION: rank().over(w)\nSOURCE_COLUMNS: []",
+    "text": "SCRIPT: script_07_fraud_scoring.py\nDATAFRAME: df2\nDERIVED_COLUMN: risk_rank_day\nEXPRESSION: F.rank().over(w)\nSOURCE_COLUMNS: []",
     "meta": {
       "type": "derived",
       "script": "script_07_fraud_scoring.py",
@@ -554,7 +554,7 @@
   },
   {
     "id": "582b03f4259f2652e2d88b5a3e41b47cd57d8cdc",
-    "text": "SCRIPT: script_07_fraud_scoring.py\nDATAFRAME: df2\nDERIVED_COLUMN: risk_percent_rank_day\nEXPRESSION: percent_rank().over(w)\nSOURCE_COLUMNS: []",
+    "text": "SCRIPT: script_07_fraud_scoring.py\nDATAFRAME: df2\nDERIVED_COLUMN: risk_percent_rank_day\nEXPRESSION: F.percent_rank().over(w)\nSOURCE_COLUMNS: []",
     "meta": {
       "type": "derived",
       "script": "script_07_fraud_scoring.py",
@@ -564,7 +564,7 @@
   },
   {
     "id": "92cdd7f3888f1882dddfbb8b49d474f9ccf56e13",
-    "text": "SCRIPT: script_07_fraud_scoring.py\nDATAFRAME: df2\nDERIVED_COLUMN: risk_bucket\nEXPRESSION: when(col(\"risk_percent_rank_day\") >= 0.99, \"critical\").when(col(\"risk_percent_rank_day\") >= 0.95, \"high\").when(col(\"risk_percent_rank_day\") >= 0.80, \"medium\").otherwise(\"low\")\nSOURCE_COLUMNS: ['risk_percent_rank_day']",
+    "text": "SCRIPT: script_07_fraud_scoring.py\nDATAFRAME: df2\nDERIVED_COLUMN: risk_bucket\nEXPRESSION: F.when(F.col('risk_percent_rank_day') >= 0.99, 'critical').when(F.col('risk_percent_rank_day') >= 0.95, 'high').when(F.col('risk_percent_rank_day') >= 0.8,'medium').otherwise('low')\nSOURCE_COLUMNS: ['risk_percent_rank_day']",
     "meta": {
       "type": "derived",
       "script": "script_07_fraud_scoring.py",
@@ -583,74 +583,64 @@
   },
   {
     "id": "4d45c0c5e44133ad0dfc77e69b2e301ccbc1ca2e",
-    "text": "SCRIPT: script_08_delta_merge_scd1_customer.py\nSOURCE_FILE: script_08_delta_merge_scd1_customer.enriched.json",
+    "text": "SCRIPT: script_08_delta_merge_scd1_customer.py\nSOURCE_FILE: script_08_delta_merge_scd1_customer.enriched.json\nREADS:\n- parquet s3a://my-bucket/silver/dim_customer/\nWRITES:\n- df=save -> save s3a://my-bucket/delta/dim_customer_scd1/\nDATAFRAMES:\n- spark\n- target_path\n- tgt\n- updates",
     "meta": {
       "type": "script",
       "script": "script_08_delta_merge_scd1_customer.py"
     }
   },
   {
+    "id": "c129589858c51ca34c736c3970d0801f2ec2fbf8",
+    "text": "SCRIPT: script_08_delta_merge_scd1_customer.py\nRESULT_DF: t\nJOIN: t inner JOIN s\nON: ['customer_id']",
+    "meta": {
+      "type": "join",
+      "script": "script_08_delta_merge_scd1_customer.py",
+      "df": "t"
+    }
+  },
+  {
     "id": "de7cf102808c7ff2fc0a4fd76fa46afe55d36864",
-    "text": "SCRIPT: script_09_sql_merge_inventory.py\nSOURCE_FILE: script_09_sql_merge_inventory.enriched.json",
+    "text": "SCRIPT: script_09_sql_merge_inventory.py\nSOURCE_FILE: script_09_sql_merge_inventory.enriched.json\nREADS:\n- parquet s3a://my-bucket/raw/inventory_updates/\nWRITES:\n- df=inv -> createOrReplaceTempView inv_updates\n- df=spark -> sql \n      CREATE TABLE IF NOT EXISTS delta_inventory\n      USING delta\n      LOCATION 's3a://my-bucket/delta/inventory/'\n    \n- df=spark -> sql \n      MERGE INTO delta_inventory t\n      USING inv_updates s\n      ON t.sku = s.sku AND t.warehouse = s.warehouse\n      WHEN MATCHED AND s.updated_at >= t.updated_at THEN\n        UPDATE SET\n          t.on_hand = s.on_hand,\n          t.updated_at = s.updated_at\n      WHEN NOT MATCHED THEN\n        INSERT (sku, warehouse, on_hand, updated_at)\n        VALUES (s.sku, s.warehouse, s.on_hand, s.updated_at)\n    \nDATAFRAMES:\n- inv\n- spark",
     "meta": {
       "type": "script",
       "script": "script_09_sql_merge_inventory.py"
     }
   },
   {
-    "id": "d0e7f9667247fd7d10009b821d1156bfe18e1a74",
-    "text": "SCRIPT: script_09_sql_merge_inventory.py\nRESULT_DF: delta_inventory\nJOIN: t merge JOIN inv_updates\nON: ['sku', 'warehouse']",
+    "id": "292f95115a075ef2c9283e1fb2c3ec84fb588187",
+    "text": "SCRIPT: script_09_sql_merge_inventory.py\nDATAFRAME: inv\nDERIVED_COLUMN: updated_at\nEXPRESSION: F.to_timestamp('updated_at')\nSOURCE_COLUMNS: []",
     "meta": {
-      "type": "join",
+      "type": "derived",
       "script": "script_09_sql_merge_inventory.py",
-      "df": "delta_inventory"
+      "df": "inv",
+      "column": "updated_at"
     }
   },
   {
     "id": "affbc935f3ddd51bae6ff67fad2111f923259985",
-    "text": "SCRIPT: script_10_mart_customer_value.py\nSOURCE_FILE: script_10_mart_customer_value.enriched.json",
+    "text": "SCRIPT: script_10_mart_customer_value.py\nSOURCE_FILE: script_10_mart_customer_value.enriched.json\nREADS:\n- parquet s3a://my-bucket/gold/fact_orders_enriched/\n- parquet s3a://my-bucket/gold/fact_orders_risk_scored/\n- parquet s3a://my-bucket/silver/dim_customer/\nWRITES:\n- df=orders -> createOrReplaceTempView orders\n- df=risk -> createOrReplaceTempView risk\n- df=cust -> createOrReplaceTempView cust\n- df=parquet -> parquet s3a://my-bucket/gold/mart_customer_value/\nDATAFRAMES:\n- cust\n- mart\n- orders\n- out\n- risk\n- spark\n- sql",
     "meta": {
       "type": "script",
       "script": "script_10_mart_customer_value.py"
     }
   },
   {
-    "id": "12d2debabfc08c173966f74f39dc760927273e93",
-    "text": "SCRIPT: script_10_mart_customer_value.py\nDATAFRAME: daily\nDERIVED_COLUMN: raw_risk_score\nEXPRESSION: COALESCE(r.raw_risk_score, 0)\nSOURCE_COLUMNS: ['r.raw_risk_score']",
+    "id": "030914d92a9428f54cdda8fa842c049278645bf1",
+    "text": "SCRIPT: script_10_mart_customer_value.py\nDATAFRAME: sql\nDERIVED_COLUMN: net_spend\nEXPRESSION: (cr.total_spend - cr.total_refunds)\nSOURCE_COLUMNS: ['total_spend', 'total_refunds']",
     "meta": {
       "type": "derived",
       "script": "script_10_mart_customer_value.py",
-      "df": "daily",
-      "column": "raw_risk_score"
-    }
-  },
-  {
-    "id": "1e47d7df55dd3b227d07e802753918bded662cab",
-    "text": "SCRIPT: script_10_mart_customer_value.py\nDATAFRAME: daily\nDERIVED_COLUMN: risk_bucket\nEXPRESSION: COALESCE(r.risk_bucket, 'unknown')\nSOURCE_COLUMNS: ['r.risk_bucket']",
-    "meta": {
-      "type": "derived",
-      "script": "script_10_mart_customer_value.py",
-      "df": "daily",
-      "column": "risk_bucket"
-    }
-  },
-  {
-    "id": "205eac80fa2a152a19b87874d2e2b3c37d9c9920",
-    "text": "SCRIPT: script_10_mart_customer_value.py\nDATAFRAME: mart\nDERIVED_COLUMN: net_spend\nEXPRESSION: (cr.total_spend - cr.total_refunds)\nSOURCE_COLUMNS: ['cr.total_spend', 'cr.total_refunds']",
-    "meta": {
-      "type": "derived",
-      "script": "script_10_mart_customer_value.py",
-      "df": "mart",
+      "df": "sql",
       "column": "net_spend"
     }
   },
   {
-    "id": "b4daeb92785ce703a570eb936af7cf82d31c699a",
-    "text": "SCRIPT: script_10_mart_customer_value.py\nDATAFRAME: mart\nDERIVED_COLUMN: customer_segment\nEXPRESSION: CASE WHEN cr.total_spend >= 10000 AND cr.ever_high_risk = 0 THEN 'VIP_SAFE' WHEN cr.total_spend >= 10000 AND cr.ever_high_risk = 1 THEN 'VIP_RISK' WHEN cr.total_spend >= 2000 THEN 'HIGH_VALUE' ELSE 'STANDARD' END\nSOURCE_COLUMNS: ['cr.total_spend', 'cr.ever_high_risk']",
+    "id": "9a54b02390343307f5e957f9f70b90c33723aa58",
+    "text": "SCRIPT: script_10_mart_customer_value.py\nDATAFRAME: sql\nDERIVED_COLUMN: customer_segment\nEXPRESSION: CASE WHEN cr.total_spend >= 10000 AND cr.ever_high_risk = 0 THEN 'VIP_SAFE' WHEN cr.total_spend >= 10000 AND cr.ever_high_risk = 1 THEN 'VIP_RISK' WHEN cr.total_spend >= 2000 THEN 'HIGH_VALUE' ELSE 'STANDARD' END\nSOURCE_COLUMNS: ['total_spend', 'ever_high_risk']",
     "meta": {
       "type": "derived",
       "script": "script_10_mart_customer_value.py",
-      "df": "mart",
+      "df": "sql",
       "column": "customer_segment"
     }
   },
@@ -746,7 +736,7 @@
   },
   {
     "id": "80ec211475c786cf55af5924f6a200e3bd452a7e",
-    "text": "SCRIPT: script_10_mart_customer_value.py\nRESULT_DF: base\nJOIN: orders left JOIN risk\nON: ['o.order_id = r.order_id']",
+    "text": "SCRIPT: script_10_mart_customer_value.py\nRESULT_DF: base\nJOIN: orders left JOIN risk\nON: ['order_id']",
     "meta": {
       "type": "join",
       "script": "script_10_mart_customer_value.py",
@@ -754,12 +744,12 @@
     }
   },
   {
-    "id": "80e575034e8e7529f5a0a602d17dc5ad6234d51c",
-    "text": "SCRIPT: script_10_mart_customer_value.py\nRESULT_DF: mart\nJOIN: cust left JOIN customer_rollup\nON: ['c.customer_id = cr.customer_id']",
+    "id": "fbac835da4f03ae6bfe7f476eded3360936da527",
+    "text": "SCRIPT: script_10_mart_customer_value.py\nRESULT_DF: sql\nJOIN: cust left JOIN customer_rollup\nON: ['customer_id']",
     "meta": {
       "type": "join",
       "script": "script_10_mart_customer_value.py",
-      "df": "mart"
+      "df": "sql"
     }
   },
   {
@@ -772,7 +762,7 @@
   },
   {
     "id": "63044f1d408effd459e21165f8afc72a94a7463d",
-    "text": "SCRIPT: script_a_customer_agg.py\nDATAFRAME: dfAgg\nDERIVED_COLUMN: big_amount\nEXPRESSION: total_amount + total_revenue\nSOURCE_COLUMNS: ['total_amount', 'total_revenue']",
+    "text": "SCRIPT: script_a_customer_agg.py\nDATAFRAME: dfAgg\nDERIVED_COLUMN: big_amount\nEXPRESSION: col('total_amount') + col('total_revenue')\nSOURCE_COLUMNS: ['total_amount', 'total_revenue']",
     "meta": {
       "type": "derived",
       "script": "script_a_customer_agg.py",

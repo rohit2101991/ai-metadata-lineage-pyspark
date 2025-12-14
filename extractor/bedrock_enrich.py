@@ -2,38 +2,22 @@
 """
 Bedrock enrichment for PySpark lineage (Amazon Nova via messages schema).
 
-USAGE
------
 Mode A (single):
   python extractor/bedrock_enrich.py examples/script_x.py outputs/script_x.json
 
 Mode B (batch):
   python extractor/bedrock_enrich.py examples/ outputs/
-
-CONFIG
-------
-Supports either new schema:
-{
-  "aws_region": "us-east-1",
-  "llm_model_id": "amazon.nova-lite-v1:0"
-}
-
-or old schema:
-{
-  "region": "us-east-1",
-  "model_id": "amazon.nova-lite-v1:0"
-}
 """
 
-from __future__ import annotations
+from __future__ import annotations          # allows forward type annotations
 
-import json
-import re
-import sys
-from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+import json                                 # read/write JSON files
+import re                                   # strip markdown fences / extract JSON block
+import sys                                  # CLI and stderr output
+from pathlib import Path                    # file paths
+from typing import Any, Dict, List, Tuple   # type hints
 
-import boto3
+import boto3                                # AWS SDK for calling Bedrock
 
 
 # ----------------------------
@@ -41,17 +25,24 @@ import boto3
 # ----------------------------
 
 def extract_json_object(text: str) -> Dict[str, Any]:
+    """
+    Bedrock sometimes returns:
+      - pure JSON
+      - JSON wrapped in ```json fences
+      - extra commentary + JSON block
+    This function makes extraction robust.
+    """
     if not text or not text.strip():
         raise ValueError("Bedrock returned empty text (cannot parse JSON).")
 
     t = text.strip()
 
-    # Strip markdown fences if present
+    # Strip markdown fences like ```json ... ```
     t = re.sub(r"^```json\s*", "", t, flags=re.IGNORECASE).strip()
     t = re.sub(r"^```\s*", "", t).strip()
     t = re.sub(r"\s*```$", "", t).strip()
 
-    # Try direct JSON
+    # Try direct JSON parse first
     try:
         obj = json.loads(t)
         if isinstance(obj, dict):
@@ -59,7 +50,7 @@ def extract_json_object(text: str) -> Dict[str, Any]:
     except Exception:
         pass
 
-    # Extract first {...} block
+    # If direct parse fails, find first {...} block
     start = t.find("{")
     end = t.rfind("}")
     if start == -1 or end == -1 or end <= start:
@@ -74,6 +65,12 @@ def extract_json_object(text: str) -> Dict[str, Any]:
 # ----------------------------
 
 def load_cfg(cfg_path: str = "config.json") -> Tuple[str, str]:
+    """
+    Supports either:
+      {"aws_region": "...", "llm_model_id": "..."}
+    or older:
+      {"region": "...", "model_id": "..."}
+    """
     cfg = json.loads(Path(cfg_path).read_text(encoding="utf-8"))
 
     region = cfg.get("aws_region") or cfg.get("region")
@@ -91,15 +88,17 @@ def load_cfg(cfg_path: str = "config.json") -> Tuple[str, str]:
 # Bedrock invocation (Nova messages schema)
 # ----------------------------
 
-def bedrock_nova_invoke_text(region: str, model_id: str, prompt: str,
-                            max_tokens: int = 2500,
-                            temperature: float = 0.0,
-                            top_p: float = 0.9) -> str:
+def bedrock_nova_invoke_text(
+    region: str,
+    model_id: str,
+    prompt: str,
+    max_tokens: int = 2500,
+    temperature: float = 0.0,
+    top_p: float = 0.9
+) -> str:
     """
-    Invoke Nova models using the required `messages` schema.
-
-    Response shape we target:
-      payload["output"]["message"]["content"][0]["text"]
+    Nova requires a `messages` schema:
+      {"messages":[{"role":"user","content":[{"text":"..."}]}], "inferenceConfig":{...}}
     """
     client = boto3.client("bedrock-runtime", region_name=region)
 
@@ -107,9 +106,7 @@ def bedrock_nova_invoke_text(region: str, model_id: str, prompt: str,
         "messages": [
             {
                 "role": "user",
-                "content": [
-                    {"text": prompt}
-                ]
+                "content": [{"text": prompt}]
             }
         ],
         "inferenceConfig": {
@@ -129,22 +126,22 @@ def bedrock_nova_invoke_text(region: str, model_id: str, prompt: str,
     raw = resp["body"].read()
     payload = json.loads(raw)
 
-    # Nova standard extraction
+    # Expected Nova output shape
     try:
         return payload["output"]["message"]["content"][0]["text"]
     except Exception:
         pass
 
-    # Fallbacks (defensive)
+    # Defensive fallbacks
     try:
         return payload["message"]["content"][0]["text"]
     except Exception:
         pass
 
+    # Another fallback: join multiple text blocks
     try:
-        # Sometimes content is a list of blocks; join text blocks
         blocks = payload.get("output", {}).get("message", {}).get("content", [])
-        texts = []
+        texts: List[str] = []
         for b in blocks:
             if isinstance(b, dict) and "text" in b:
                 texts.append(b["text"])
@@ -153,11 +150,14 @@ def bedrock_nova_invoke_text(region: str, model_id: str, prompt: str,
     except Exception:
         pass
 
-    # Last resort: return payload string for debugging
+    # Last resort: return entire payload as string for debugging
     return json.dumps(payload)
 
 
 def bedrock_invoke_json(region: str, model_id: str, prompt: str) -> Dict[str, Any]:
+    """
+    Invoke Nova, then parse JSON from its text response.
+    """
     text = bedrock_nova_invoke_text(region, model_id, prompt)
     return extract_json_object(text)
 
@@ -167,6 +167,12 @@ def bedrock_invoke_json(region: str, model_id: str, prompt: str) -> Dict[str, An
 # ----------------------------
 
 def build_prompt(script_text: str, base_json: Dict[str, Any]) -> str:
+    """
+    Create a strict prompt that asks Nova to return a specific JSON schema.
+    We provide:
+      - the PySpark script text
+      - the deterministic base JSON extracted by static_extract.py
+    """
     schema = {
         "group_by": [{"df": "df_name", "keys": ["col1", "col2"]}],
         "aggregations": [{"df": "df_name", "expr": "sum(amount)", "source_cols": ["amount"], "alias": "total_amount"}],
@@ -177,6 +183,7 @@ def build_prompt(script_text: str, base_json: Dict[str, Any]) -> str:
     }
 
     script_excerpt = script_text if len(script_text) <= 12000 else (script_text[:12000] + "\n\n# TRUNCATED\n")
+
     base_excerpt = json.dumps(base_json, indent=2)
     if len(base_excerpt) > 12000:
         base_excerpt = base_excerpt[:12000] + "\n\n# TRUNCATED\n"
@@ -207,6 +214,15 @@ Now return the enrichment JSON only.
 
 
 def enrich_one(script_path: Path, base_json_path: Path, out_dir: Path) -> Path:
+    """
+    Enrich one script:
+      - read config for Bedrock region/model
+      - read script text
+      - read static extraction json
+      - call Bedrock to get enrichment json
+      - merge enrichment into base json
+      - write <script>.enriched.json
+    """
     region, model_id = load_cfg("config.json")
 
     script_text = script_path.read_text(encoding="utf-8", errors="ignore")
@@ -215,6 +231,7 @@ def enrich_one(script_path: Path, base_json_path: Path, out_dir: Path) -> Path:
     prompt = build_prompt(script_text, base_json)
     enrichment = bedrock_invoke_json(region=region, model_id=model_id, prompt=prompt)
 
+    # Merge: keep static truth, add enrichment as a nested object
     merged = dict(base_json)
     merged["bedrock_enrichment"] = enrichment
     merged["enriched_from"] = {
@@ -236,6 +253,9 @@ def enrich_one(script_path: Path, base_json_path: Path, out_dir: Path) -> Path:
 # ----------------------------
 
 def iter_py_files(p: Path) -> List[Path]:
+    """
+    Get .py files (non-recursive) from a directory, or return the file itself.
+    """
     if p.is_file() and p.suffix == ".py":
         return [p]
     if p.is_dir():
@@ -244,6 +264,11 @@ def iter_py_files(p: Path) -> List[Path]:
 
 
 def main(argv: List[str]) -> int:
+    """
+    Supports:
+      python extractor/bedrock_enrich.py <script.py> <outputs/base.json>
+      python extractor/bedrock_enrich.py <examples_dir> <outputs_dir>
+    """
     if len(argv) < 3:
         print(
             "Usage:\n"
@@ -265,7 +290,7 @@ def main(argv: List[str]) -> int:
         enrich_one(script, base_json, base_json.parent)
         return 0
 
-    # Mode B: batch
+    # Mode B: batch (directory)
     if a1.is_dir():
         examples_dir = a1
         outputs_dir = Path(argv[2])

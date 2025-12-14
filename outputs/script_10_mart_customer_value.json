@@ -1,8 +1,78 @@
 {
   "script_name": "script_10_mart_customer_value.py",
-  "dataframes": [],
+  "dataframes": [
+    {
+      "df_name": "orders",
+      "type": "source",
+      "columns": []
+    },
+    {
+      "df_name": "risk",
+      "type": "intermediate",
+      "columns": []
+    },
+    {
+      "df_name": "cust",
+      "type": "intermediate",
+      "columns": []
+    },
+    {
+      "df_name": "sql",
+      "type": "intermediate",
+      "columns": []
+    },
+    {
+      "df_name": "mart",
+      "type": "intermediate",
+      "columns": []
+    },
+    {
+      "df_name": "out",
+      "type": "intermediate",
+      "columns": []
+    },
+    {
+      "df_name": "spark",
+      "type": "sink",
+      "columns": []
+    }
+  ],
   "assets": {
-    "reads": [],
-    "writes": []
+    "reads": [
+      {
+        "format": "parquet",
+        "path": "s3a://my-bucket/gold/fact_orders_enriched/"
+      },
+      {
+        "format": "parquet",
+        "path": "s3a://my-bucket/gold/fact_orders_risk_scored/"
+      },
+      {
+        "format": "parquet",
+        "path": "s3a://my-bucket/silver/dim_customer/"
+      }
+    ],
+    "writes": [
+      {
+        "format": "createOrReplaceTempView",
+        "path": "orders",
+        "df": "orders"
+      },
+      {
+        "format": "createOrReplaceTempView",
+        "path": "risk",
+        "df": "risk"
+      },
+      {
+        "format": "createOrReplaceTempView",
+        "path": "cust",
+        "df": "cust"
+      },
+      {
+        "format": "parquet",
+        "path": "s3a://my-bucket/gold/mart_customer_value/",
+        "df": "parquet"
+      }
+    ]
   }
 }

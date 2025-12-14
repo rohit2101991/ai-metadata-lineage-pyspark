@@ -26,15 +26,96 @@ small{color:#9ca3af}
 flowchart LR
 
 script_01_bronze_ingest_orders_py["script_01_bronze_ingest_orders.py"]
+asset_s3a___my_bucket_bronze_orders_["WRITE\ns3a://my-bucket/bronze/orders/"]
+script_01_bronze_ingest_orders_py --> asset_s3a___my_bucket_bronze_orders_
+asset_header["READ\nheader"]
+asset_header --> script_01_bronze_ingest_orders_py
 script_02_dim_customer_latest_py["script_02_dim_customer_latest.py"]
+asset_s3a___my_bucket_silver_dim_customer_["WRITE\ns3a://my-bucket/silver/dim_customer/"]
+script_02_dim_customer_latest_py --> asset_s3a___my_bucket_silver_dim_customer_
+asset_s3a___my_bucket_raw_customers_["READ\ns3a://my-bucket/raw/customers/"]
+asset_s3a___my_bucket_raw_customers_ --> script_02_dim_customer_latest_py
 script_03_fact_orders_enriched_py["script_03_fact_orders_enriched.py"]
+asset_s3a___my_bucket_gold_fact_orders_enriched_["WRITE\ns3a://my-bucket/gold/fact_orders_enriched/"]
+script_03_fact_orders_enriched_py --> asset_s3a___my_bucket_gold_fact_orders_enriched_
+asset_s3a___my_bucket_bronze_orders_["READ\ns3a://my-bucket/bronze/orders/"]
+asset_s3a___my_bucket_bronze_orders_ --> script_03_fact_orders_enriched_py
+asset_s3a___my_bucket_silver_dim_customer_["READ\ns3a://my-bucket/silver/dim_customer/"]
+asset_s3a___my_bucket_silver_dim_customer_ --> script_03_fact_orders_enriched_py
 script_04_dim_product_sql_cte_py["script_04_dim_product_sql_cte.py"]
+asset_raw_products["WRITE\nraw_products"]
+script_04_dim_product_sql_cte_py --> asset_raw_products
+asset_s3a___my_bucket_silver_dim_product_["WRITE\ns3a://my-bucket/silver/dim_product/"]
+script_04_dim_product_sql_cte_py --> asset_s3a___my_bucket_silver_dim_product_
+asset_s3a___my_bucket_raw_products_["READ\ns3a://my-bucket/raw/products/"]
+asset_s3a___my_bucket_raw_products_ --> script_04_dim_product_sql_cte_py
 script_05_sales_margin_rank_py["script_05_sales_margin_rank.py"]
+asset_s3a___my_bucket_gold_sales_margin_ranked_["WRITE\ns3a://my-bucket/gold/sales_margin_ranked/"]
+script_05_sales_margin_rank_py --> asset_s3a___my_bucket_gold_sales_margin_ranked_
+asset_s3a___my_bucket_gold_fact_orders_enriched_["READ\ns3a://my-bucket/gold/fact_orders_enriched/"]
+asset_s3a___my_bucket_gold_fact_orders_enriched_ --> script_05_sales_margin_rank_py
+asset_s3a___my_bucket_silver_dim_product_["READ\ns3a://my-bucket/silver/dim_product/"]
+asset_s3a___my_bucket_silver_dim_product_ --> script_05_sales_margin_rank_py
+asset_s3a___my_bucket_raw_order_items_["READ\ns3a://my-bucket/raw/order_items/"]
+asset_s3a___my_bucket_raw_order_items_ --> script_05_sales_margin_rank_py
 script_06_web_sessionization_py["script_06_web_sessionization.py"]
+asset_sessions["WRITE\nsessions"]
+script_06_web_sessionization_py --> asset_sessions
+asset_s3a___my_bucket_gold_web_sessions_["WRITE\ns3a://my-bucket/gold/web_sessions/"]
+script_06_web_sessionization_py --> asset_s3a___my_bucket_gold_web_sessions_
+asset_s3a___my_bucket_raw_web_clicks_["READ\ns3a://my-bucket/raw/web_clicks/"]
+asset_s3a___my_bucket_raw_web_clicks_ --> script_06_web_sessionization_py
 script_07_fraud_scoring_py["script_07_fraud_scoring.py"]
+asset_s3a___my_bucket_gold_fact_orders_risk_scored_["WRITE\ns3a://my-bucket/gold/fact_orders_risk_scored/"]
+script_07_fraud_scoring_py --> asset_s3a___my_bucket_gold_fact_orders_risk_scored_
+asset_s3a___my_bucket_gold_fact_orders_enriched_["READ\ns3a://my-bucket/gold/fact_orders_enriched/"]
+asset_s3a___my_bucket_gold_fact_orders_enriched_ --> script_07_fraud_scoring_py
+asset_s3a___my_bucket_gold_web_sessions_["READ\ns3a://my-bucket/gold/web_sessions/"]
+asset_s3a___my_bucket_gold_web_sessions_ --> script_07_fraud_scoring_py
 script_08_delta_merge_scd1_customer_py["script_08_delta_merge_scd1_customer.py"]
+asset_s3a___my_bucket_delta_dim_customer_scd1_["WRITE\ns3a://my-bucket/delta/dim_customer_scd1/"]
+script_08_delta_merge_scd1_customer_py --> asset_s3a___my_bucket_delta_dim_customer_scd1_
+asset_s3a___my_bucket_silver_dim_customer_["READ\ns3a://my-bucket/silver/dim_customer/"]
+asset_s3a___my_bucket_silver_dim_customer_ --> script_08_delta_merge_scd1_customer_py
 script_09_sql_merge_inventory_py["script_09_sql_merge_inventory.py"]
+asset_inv_updates["WRITE\ninv_updates"]
+script_09_sql_merge_inventory_py --> asset_inv_updates
+asset________CREATE_TABLE_IF_NOT_EXISTS_delta_inventory_______USING_delta_______LOCATION__s3a___my_bucket_delta_inventory_______["WRITE\n
+      CREATE TABLE IF NOT EXISTS delta_inventory
+      USING delta
+      LOCATION 's3a://my-bucket/delta/inventory/'
+    "]
+script_09_sql_merge_inventory_py --> asset________CREATE_TABLE_IF_NOT_EXISTS_delta_inventory_______USING_delta_______LOCATION__s3a___my_bucket_delta_inventory_______
+asset________MERGE_INTO_delta_inventory_t_______USING_inv_updates_s_______ON_t_sku___s_sku_AND_t_warehouse___s_warehouse_______WHEN_MATCHED_AND_s_updated_at____t_updated_at_THEN_________UPDATE_SET___________t_on_hand___s_on_hand____________t_updated_at___s_updated_at_______WHEN_NOT_MATCHED_THEN_________INSERT__sku__warehouse__on_hand__updated_at__________VALUES__s_sku__s_warehouse__s_on_hand__s_updated_at______["WRITE\n
+      MERGE INTO delta_inventory t
+      USING inv_updates s
+      ON t.sku = s.sku AND t.warehouse = s.warehouse
+      WHEN MATCHED AND s.updated_at >= t.updated_at THEN
+        UPDATE SET
+          t.on_hand = s.on_hand,
+          t.updated_at = s.updated_at
+      WHEN NOT MATCHED THEN
+        INSERT (sku, warehouse, on_hand, updated_at)
+        VALUES (s.sku, s.warehouse, s.on_hand, s.updated_at)
+    "]
+script_09_sql_merge_inventory_py --> asset________MERGE_INTO_delta_inventory_t_______USING_inv_updates_s_______ON_t_sku___s_sku_AND_t_warehouse___s_warehouse_______WHEN_MATCHED_AND_s_updated_at____t_updated_at_THEN_________UPDATE_SET___________t_on_hand___s_on_hand____________t_updated_at___s_updated_at_______WHEN_NOT_MATCHED_THEN_________INSERT__sku__warehouse__on_hand__updated_at__________VALUES__s_sku__s_warehouse__s_on_hand__s_updated_at______
+asset_s3a___my_bucket_raw_inventory_updates_["READ\ns3a://my-bucket/raw/inventory_updates/"]
+asset_s3a___my_bucket_raw_inventory_updates_ --> script_09_sql_merge_inventory_py
 script_10_mart_customer_value_py["script_10_mart_customer_value.py"]
+asset_orders["WRITE\norders"]
+script_10_mart_customer_value_py --> asset_orders
+asset_risk["WRITE\nrisk"]
+script_10_mart_customer_value_py --> asset_risk
+asset_cust["WRITE\ncust"]
+script_10_mart_customer_value_py --> asset_cust
+asset_s3a___my_bucket_gold_mart_customer_value_["WRITE\ns3a://my-bucket/gold/mart_customer_value/"]
+script_10_mart_customer_value_py --> asset_s3a___my_bucket_gold_mart_customer_value_
+asset_s3a___my_bucket_gold_fact_orders_enriched_["READ\ns3a://my-bucket/gold/fact_orders_enriched/"]
+asset_s3a___my_bucket_gold_fact_orders_enriched_ --> script_10_mart_customer_value_py
+asset_s3a___my_bucket_gold_fact_orders_risk_scored_["READ\ns3a://my-bucket/gold/fact_orders_risk_scored/"]
+asset_s3a___my_bucket_gold_fact_orders_risk_scored_ --> script_10_mart_customer_value_py
+asset_s3a___my_bucket_silver_dim_customer_["READ\ns3a://my-bucket/silver/dim_customer/"]
+asset_s3a___my_bucket_silver_dim_customer_ --> script_10_mart_customer_value_py
 script_a_customer_agg_py["script_a_customer_agg.py"]
 asset_s3a___mybucket_curated_customer_agg_["WRITE\ns3a://mybucket/curated/customer_agg/"]
 script_a_customer_agg_py --> asset_s3a___mybucket_curated_customer_agg_
@@ -47,21 +128,587 @@ asset_s3a___mybucket_curated_customer_agg_["READ\ns3a://mybucket/curated/custome
 asset_s3a___mybucket_curated_customer_agg_ --> script_b_join_products_py
 asset_s3a___mybucket_ref_products_parquet["READ\ns3a://mybucket/ref/products.parquet"]
 asset_s3a___mybucket_ref_products_parquet --> script_b_join_products_py
+asset_s3a___my_bucket_bronze_orders["ASSET\ns3a://my-bucket/bronze/orders"]
+script_01_bronze_ingest_orders_py --> asset_s3a___my_bucket_bronze_orders --> script_03_fact_orders_enriched_py
+asset_s3a___my_bucket_silver_dim_customer["ASSET\ns3a://my-bucket/silver/dim_customer"]
+script_02_dim_customer_latest_py --> asset_s3a___my_bucket_silver_dim_customer --> script_03_fact_orders_enriched_py
+asset_s3a___my_bucket_gold_fact_orders_enriched["ASSET\ns3a://my-bucket/gold/fact_orders_enriched"]
+script_03_fact_orders_enriched_py --> asset_s3a___my_bucket_gold_fact_orders_enriched --> script_05_sales_margin_rank_py
+asset_s3a___my_bucket_silver_dim_product["ASSET\ns3a://my-bucket/silver/dim_product"]
+script_04_dim_product_sql_cte_py --> asset_s3a___my_bucket_silver_dim_product --> script_05_sales_margin_rank_py
+asset_s3a___my_bucket_gold_fact_orders_enriched["ASSET\ns3a://my-bucket/gold/fact_orders_enriched"]
+script_03_fact_orders_enriched_py --> asset_s3a___my_bucket_gold_fact_orders_enriched --> script_07_fraud_scoring_py
+asset_s3a___my_bucket_gold_web_sessions["ASSET\ns3a://my-bucket/gold/web_sessions"]
+script_06_web_sessionization_py --> asset_s3a___my_bucket_gold_web_sessions --> script_07_fraud_scoring_py
+asset_s3a___my_bucket_silver_dim_customer["ASSET\ns3a://my-bucket/silver/dim_customer"]
+script_02_dim_customer_latest_py --> asset_s3a___my_bucket_silver_dim_customer --> script_08_delta_merge_scd1_customer_py
+asset_s3a___my_bucket_gold_fact_orders_enriched["ASSET\ns3a://my-bucket/gold/fact_orders_enriched"]
+script_03_fact_orders_enriched_py --> asset_s3a___my_bucket_gold_fact_orders_enriched --> script_10_mart_customer_value_py
+asset_s3a___my_bucket_gold_fact_orders_risk_scored["ASSET\ns3a://my-bucket/gold/fact_orders_risk_scored"]
+script_07_fraud_scoring_py --> asset_s3a___my_bucket_gold_fact_orders_risk_scored --> script_10_mart_customer_value_py
+asset_s3a___my_bucket_silver_dim_customer["ASSET\ns3a://my-bucket/silver/dim_customer"]
+script_02_dim_customer_latest_py --> asset_s3a___my_bucket_silver_dim_customer --> script_10_mart_customer_value_py
 asset_s3a___mybucket_curated_customer_agg["ASSET\ns3a://mybucket/curated/customer_agg"]
 script_a_customer_agg_py --> asset_s3a___mybucket_curated_customer_agg --> script_b_join_products_py
 </div>
 <hr/>
 <h2>2. DataFrames (expand)</h2>
 <h3>script_01_bronze_ingest_orders.py</h3>
+<details>
+<summary>src (source)</summary>
+<div class="mermaid">
+flowchart TB
+DF_src["src"]
+</div>
+</details>
+<details>
+<summary>df (intermediate)</summary>
+<div class="mermaid">
+flowchart TB
+DF_df["df"]
+</div>
+</details>
+<details>
+<summary>df1 (intermediate)</summary>
+<div class="mermaid">
+flowchart TB
+DF_df1["df1"]
+df1_col_abs_amount["abs_amount"]
+df1_col_abs_amount --> DF_df1
+df1_col_is_refund["is_refund"]
+df1_col_is_refund --> DF_df1
+df1_col_country["country"]
+df1_col_country --> DF_df1
+df1_col_channel["channel"]
+df1_col_channel --> DF_df1
+df1_col_currency["currency"]
+df1_col_currency --> DF_df1
+df1_col_amount["amount"]
+df1_col_amount --> DF_df1
+df1_col_order_id["order_id"]
+df1_col_order_id --> DF_df1
+df1_col_customer_id["customer_id"]
+df1_col_customer_id --> DF_df1
+df1_col_order_date["order_date"]
+df1_col_order_date --> DF_df1
+df1_col_order_ts["order_ts"]
+df1_col_order_ts --> DF_df1
+</div>
+</details>
+<details>
+<summary>out (intermediate)</summary>
+<div class="mermaid">
+flowchart TB
+DF_out["out"]
+</div>
+</details>
+<details>
+<summary>spark (sink)</summary>
+<div class="mermaid">
+flowchart TB
+DF_spark["spark"]
+</div>
+</details>
 <h3>script_02_dim_customer_latest.py</h3>
+<details>
+<summary>src (source)</summary>
+<div class="mermaid">
+flowchart TB
+DF_src["src"]
+</div>
+</details>
+<details>
+<summary>df (intermediate)</summary>
+<div class="mermaid">
+flowchart TB
+DF_df["df"]
+</div>
+</details>
+<details>
+<summary>w (intermediate)</summary>
+<div class="mermaid">
+flowchart TB
+DF_w["w"]
+</div>
+</details>
+<details>
+<summary>df2 (intermediate)</summary>
+<div class="mermaid">
+flowchart TB
+DF_df2["df2"]
+df2_col_email_domain["email_domain"]
+df2_col_email_domain --> DF_df2
+df2_col_customer_tier["customer_tier"]
+df2_col_customer_tier --> DF_df2
+df2_col_drnk["drnk"]
+df2_col_drnk --> DF_df2
+df2_col_rnk["rnk"]
+df2_col_rnk --> DF_df2
+df2_col_rn["rn"]
+df2_col_rn --> DF_df2
+</div>
+</details>
+<details>
+<summary>out (intermediate)</summary>
+<div class="mermaid">
+flowchart TB
+DF_out["out"]
+</div>
+</details>
+<details>
+<summary>spark (sink)</summary>
+<div class="mermaid">
+flowchart TB
+DF_spark["spark"]
+</div>
+</details>
 <h3>script_03_fact_orders_enriched.py</h3>
+<details>
+<summary>orders (source)</summary>
+<div class="mermaid">
+flowchart TB
+DF_orders["orders"]
+</div>
+</details>
+<details>
+<summary>dim_cust (intermediate)</summary>
+<div class="mermaid">
+flowchart TB
+DF_dim_cust["dim_cust"]
+</div>
+</details>
+<details>
+<summary>df (intermediate)</summary>
+<div class="mermaid">
+flowchart TB
+DF_df["df"]
+df_col___join__unknown["__join__unknown"]
+df_col___join__unknown --> DF_df
+</div>
+</details>
+<details>
+<summary>w (intermediate)</summary>
+<div class="mermaid">
+flowchart TB
+DF_w["w"]
+</div>
+</details>
+<details>
+<summary>df2 (intermediate)</summary>
+<div class="mermaid">
+flowchart TB
+DF_df2["df2"]
+df2_col_rolling_30_orders_sum["rolling_30_orders_sum"]
+df2_col_rolling_30_orders_sum --> DF_df2
+df2_col_rolling_7_orders_sum["rolling_7_orders_sum"]
+df2_col_rolling_7_orders_sum --> DF_df2
+df2_col_amount_delta_prev["amount_delta_prev"]
+df2_col_amount_delta_prev --> DF_df2
+df2_col_next_amount["next_amount"]
+df2_col_next_amount --> DF_df2
+df2_col_prev_amount["prev_amount"]
+df2_col_prev_amount --> DF_df2
+</div>
+</details>
+<details>
+<summary>out (intermediate)</summary>
+<div class="mermaid">
+flowchart TB
+DF_out["out"]
+</div>
+</details>
+<details>
+<summary>spark (sink)</summary>
+<div class="mermaid">
+flowchart TB
+DF_spark["spark"]
+</div>
+</details>
 <h3>script_04_dim_product_sql_cte.py</h3>
+<details>
+<summary>src (source)</summary>
+<div class="mermaid">
+flowchart TB
+DF_src["src"]
+</div>
+</details>
+<details>
+<summary>df (intermediate)</summary>
+<div class="mermaid">
+flowchart TB
+DF_df["df"]
+</div>
+</details>
+<details>
+<summary>sql (intermediate)</summary>
+<div class="mermaid">
+flowchart TB
+DF_sql["sql"]
+</div>
+</details>
+<details>
+<summary>dim_prod (intermediate)</summary>
+<div class="mermaid">
+flowchart TB
+DF_dim_prod["dim_prod"]
+</div>
+</details>
+<details>
+<summary>out (intermediate)</summary>
+<div class="mermaid">
+flowchart TB
+DF_out["out"]
+</div>
+</details>
+<details>
+<summary>spark (sink)</summary>
+<div class="mermaid">
+flowchart TB
+DF_spark["spark"]
+</div>
+</details>
 <h3>script_05_sales_margin_rank.py</h3>
+<details>
+<summary>fact (source)</summary>
+<div class="mermaid">
+flowchart TB
+DF_fact["fact"]
+</div>
+</details>
+<details>
+<summary>dim_prod (intermediate)</summary>
+<div class="mermaid">
+flowchart TB
+DF_dim_prod["dim_prod"]
+</div>
+</details>
+<details>
+<summary>line_items (intermediate)</summary>
+<div class="mermaid">
+flowchart TB
+DF_line_items["line_items"]
+</div>
+</details>
+<details>
+<summary>df (intermediate)</summary>
+<div class="mermaid">
+flowchart TB
+DF_df["df"]
+df_col_est_margin_pct["est_margin_pct"]
+df_col_est_margin_pct --> DF_df
+df_col_est_margin["est_margin"]
+df_col_est_margin --> DF_df
+df_col_est_cost["est_cost"]
+df_col_est_cost --> DF_df
+df_col_qty["qty"]
+df_col_qty --> DF_df
+df_col_gross_sales["gross_sales"]
+df_col_gross_sales --> DF_df
+df_col___join__unknown["__join__unknown"]
+df_col___join__unknown --> DF_df
+</div>
+</details>
+<details>
+<summary>w (intermediate)</summary>
+<div class="mermaid">
+flowchart TB
+DF_w["w"]
+</div>
+</details>
+<details>
+<summary>df2 (intermediate)</summary>
+<div class="mermaid">
+flowchart TB
+DF_df2["df2"]
+df2_col_top_10_flag["top_10_flag"]
+df2_col_top_10_flag --> DF_df2
+df2_col_margin_dense_rank_day["margin_dense_rank_day"]
+df2_col_margin_dense_rank_day --> DF_df2
+df2_col_margin_rank_day["margin_rank_day"]
+df2_col_margin_rank_day --> DF_df2
+</div>
+</details>
+<details>
+<summary>out (intermediate)</summary>
+<div class="mermaid">
+flowchart TB
+DF_out["out"]
+</div>
+</details>
+<details>
+<summary>spark (sink)</summary>
+<div class="mermaid">
+flowchart TB
+DF_spark["spark"]
+</div>
+</details>
 <h3>script_06_web_sessionization.py</h3>
+<details>
+<summary>clicks (source)</summary>
+<div class="mermaid">
+flowchart TB
+DF_clicks["clicks"]
+</div>
+</details>
+<details>
+<summary>df (intermediate)</summary>
+<div class="mermaid">
+flowchart TB
+DF_df["df"]
+df_col_ref_host["ref_host"]
+df_col_ref_host --> DF_df
+df_col_url_host["url_host"]
+df_col_url_host --> DF_df
+df_col_event_date["event_date"]
+df_col_event_date --> DF_df
+df_col_event_ts["event_ts"]
+df_col_event_ts --> DF_df
+</div>
+</details>
+<details>
+<summary>w (intermediate)</summary>
+<div class="mermaid">
+flowchart TB
+DF_w["w"]
+</div>
+</details>
+<details>
+<summary>df2 (intermediate)</summary>
+<div class="mermaid">
+flowchart TB
+DF_df2["df2"]
+df2_col_prev_ts["prev_ts"]
+df2_col_prev_ts --> DF_df2
+</div>
+</details>
+<details>
+<summary>df3 (intermediate)</summary>
+<div class="mermaid">
+flowchart TB
+DF_df3["df3"]
+df3_col_gap_min["gap_min"]
+df3_col_gap_min --> DF_df3
+</div>
+</details>
+<details>
+<summary>df4 (intermediate)</summary>
+<div class="mermaid">
+flowchart TB
+DF_df4["df4"]
+df4_col_new_session_flag["new_session_flag"]
+df4_col_new_session_flag --> DF_df4
+</div>
+</details>
+<details>
+<summary>df5 (intermediate)</summary>
+<div class="mermaid">
+flowchart TB
+DF_df5["df5"]
+df5_col_session_num["session_num"]
+df5_col_session_num --> DF_df5
+</div>
+</details>
+<details>
+<summary>df6 (intermediate)</summary>
+<div class="mermaid">
+flowchart TB
+DF_df6["df6"]
+df6_col_session_id["session_id"]
+df6_col_session_id --> DF_df6
+</div>
+</details>
+<details>
+<summary>agg_sql (intermediate)</summary>
+<div class="mermaid">
+flowchart TB
+DF_agg_sql["agg_sql"]
+</div>
+</details>
+<details>
+<summary>sess_agg (intermediate)</summary>
+<div class="mermaid">
+flowchart TB
+DF_sess_agg["sess_agg"]
+</div>
+</details>
+<details>
+<summary>out (intermediate)</summary>
+<div class="mermaid">
+flowchart TB
+DF_out["out"]
+</div>
+</details>
+<details>
+<summary>spark (sink)</summary>
+<div class="mermaid">
+flowchart TB
+DF_spark["spark"]
+</div>
+</details>
 <h3>script_07_fraud_scoring.py</h3>
+<details>
+<summary>fact (source)</summary>
+<div class="mermaid">
+flowchart TB
+DF_fact["fact"]
+</div>
+</details>
+<details>
+<summary>sessions (intermediate)</summary>
+<div class="mermaid">
+flowchart TB
+DF_sessions["sessions"]
+</div>
+</details>
+<details>
+<summary>df (intermediate)</summary>
+<div class="mermaid">
+flowchart TB
+DF_df["df"]
+df_col_raw_risk_score["raw_risk_score"]
+df_col_raw_risk_score --> DF_df
+df_col_risk_from_sessions["risk_from_sessions"]
+df_col_risk_from_sessions --> DF_df
+df_col_risk_from_refund["risk_from_refund"]
+df_col_risk_from_refund --> DF_df
+df_col_risk_from_channel["risk_from_channel"]
+df_col_risk_from_channel --> DF_df
+df_col_high_value_flag["high_value_flag"]
+df_col_high_value_flag --> DF_df
+df_col___join__unknown["__join__unknown"]
+df_col___join__unknown --> DF_df
+</div>
+</details>
+<details>
+<summary>w (intermediate)</summary>
+<div class="mermaid">
+flowchart TB
+DF_w["w"]
+</div>
+</details>
+<details>
+<summary>df2 (intermediate)</summary>
+<div class="mermaid">
+flowchart TB
+DF_df2["df2"]
+df2_col_risk_bucket["risk_bucket"]
+df2_col_risk_bucket --> DF_df2
+df2_col_risk_percent_rank_day["risk_percent_rank_day"]
+df2_col_risk_percent_rank_day --> DF_df2
+df2_col_risk_rank_day["risk_rank_day"]
+df2_col_risk_rank_day --> DF_df2
+</div>
+</details>
+<details>
+<summary>out (intermediate)</summary>
+<div class="mermaid">
+flowchart TB
+DF_out["out"]
+</div>
+</details>
+<details>
+<summary>spark (sink)</summary>
+<div class="mermaid">
+flowchart TB
+DF_spark["spark"]
+</div>
+</details>
 <h3>script_08_delta_merge_scd1_customer.py</h3>
+<details>
+<summary>updates (source)</summary>
+<div class="mermaid">
+flowchart TB
+DF_updates["updates"]
+</div>
+</details>
+<details>
+<summary>target_path (intermediate)</summary>
+<div class="mermaid">
+flowchart TB
+DF_target_path["target_path"]
+</div>
+</details>
+<details>
+<summary>tgt (intermediate)</summary>
+<div class="mermaid">
+flowchart TB
+DF_tgt["tgt"]
+</div>
+</details>
+<details>
+<summary>spark (sink)</summary>
+<div class="mermaid">
+flowchart TB
+DF_spark["spark"]
+</div>
+</details>
 <h3>script_09_sql_merge_inventory.py</h3>
+<details>
+<summary>inv (source)</summary>
+<div class="mermaid">
+flowchart TB
+DF_inv["inv"]
+inv_col_updated_at["updated_at"]
+inv_col_updated_at --> DF_inv
+</div>
+</details>
+<details>
+<summary>spark (sink)</summary>
+<div class="mermaid">
+flowchart TB
+DF_spark["spark"]
+</div>
+</details>
 <h3>script_10_mart_customer_value.py</h3>
+<details>
+<summary>orders (source)</summary>
+<div class="mermaid">
+flowchart TB
+DF_orders["orders"]
+</div>
+</details>
+<details>
+<summary>risk (intermediate)</summary>
+<div class="mermaid">
+flowchart TB
+DF_risk["risk"]
+</div>
+</details>
+<details>
+<summary>cust (intermediate)</summary>
+<div class="mermaid">
+flowchart TB
+DF_cust["cust"]
+</div>
+</details>
+<details>
+<summary>sql (intermediate)</summary>
+<div class="mermaid">
+flowchart TB
+DF_sql["sql"]
+</div>
+</details>
+<details>
+<summary>mart (intermediate)</summary>
+<div class="mermaid">
+flowchart TB
+DF_mart["mart"]
+</div>
+</details>
+<details>
+<summary>out (intermediate)</summary>
+<div class="mermaid">
+flowchart TB
+DF_out["out"]
+</div>
+</details>
+<details>
+<summary>spark (sink)</summary>
+<div class="mermaid">
+flowchart TB
+DF_spark["spark"]
+</div>
+</details>
 <h3>script_a_customer_agg.py</h3>
 <details>
 <summary>df1 (source)</summary>

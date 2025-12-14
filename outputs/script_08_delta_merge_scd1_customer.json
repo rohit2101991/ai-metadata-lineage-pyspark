@@ -1,8 +1,40 @@
 {
   "script_name": "script_08_delta_merge_scd1_customer.py",
-  "dataframes": [],
+  "dataframes": [
+    {
+      "df_name": "updates",
+      "type": "source",
+      "columns": []
+    },
+    {
+      "df_name": "target_path",
+      "type": "intermediate",
+      "columns": []
+    },
+    {
+      "df_name": "tgt",
+      "type": "intermediate",
+      "columns": []
+    },
+    {
+      "df_name": "spark",
+      "type": "sink",
+      "columns": []
+    }
+  ],
   "assets": {
-    "reads": [],
-    "writes": []
+    "reads": [
+      {
+        "format": "parquet",
+        "path": "s3a://my-bucket/silver/dim_customer/"
+      }
+    ],
+    "writes": [
+      {
+        "format": "save",
+        "path": "s3a://my-bucket/delta/dim_customer_scd1/",
+        "df": "save"
+      }
+    ]
   }
 }

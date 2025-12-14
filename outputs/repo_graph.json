@@ -1,6 +1,56 @@
 {
   "links": [
     {
+      "from_script": "script_01_bronze_ingest_orders.py",
+      "to_script": "script_03_fact_orders_enriched.py",
+      "asset": "s3a://my-bucket/bronze/orders"
+    },
+    {
+      "from_script": "script_02_dim_customer_latest.py",
+      "to_script": "script_03_fact_orders_enriched.py",
+      "asset": "s3a://my-bucket/silver/dim_customer"
+    },
+    {
+      "from_script": "script_03_fact_orders_enriched.py",
+      "to_script": "script_05_sales_margin_rank.py",
+      "asset": "s3a://my-bucket/gold/fact_orders_enriched"
+    },
+    {
+      "from_script": "script_04_dim_product_sql_cte.py",
+      "to_script": "script_05_sales_margin_rank.py",
+      "asset": "s3a://my-bucket/silver/dim_product"
+    },
+    {
+      "from_script": "script_03_fact_orders_enriched.py",
+      "to_script": "script_07_fraud_scoring.py",
+      "asset": "s3a://my-bucket/gold/fact_orders_enriched"
+    },
+    {
+      "from_script": "script_06_web_sessionization.py",
+      "to_script": "script_07_fraud_scoring.py",
+      "asset": "s3a://my-bucket/gold/web_sessions"
+    },
+    {
+      "from_script": "script_02_dim_customer_latest.py",
+      "to_script": "script_08_delta_merge_scd1_customer.py",
+      "asset": "s3a://my-bucket/silver/dim_customer"
+    },
+    {
+      "from_script": "script_03_fact_orders_enriched.py",
+      "to_script": "script_10_mart_customer_value.py",
+      "asset": "s3a://my-bucket/gold/fact_orders_enriched"
+    },
+    {
+      "from_script": "script_07_fraud_scoring.py",
+      "to_script": "script_10_mart_customer_value.py",
+      "asset": "s3a://my-bucket/gold/fact_orders_risk_scored"
+    },
+    {
+      "from_script": "script_02_dim_customer_latest.py",
+      "to_script": "script_10_mart_customer_value.py",
+      "asset": "s3a://my-bucket/silver/dim_customer"
+    },
+    {
       "from_script": "script_a_customer_agg.py",
       "to_script": "script_b_join_products.py",
       "asset": "s3a://mybucket/curated/customer_agg"

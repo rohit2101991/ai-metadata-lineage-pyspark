@@ -1,14 +1,205 @@
 {
   "script_name": "script_06_web_sessionization.py",
-  "dataframes": [],
+  "dataframes": [
+    {
+      "df_name": "clicks",
+      "type": "source",
+      "columns": [],
+      "lineage": []
+    },
+    {
+      "df_name": "df",
+      "type": "intermediate",
+      "columns": [
+        {
+          "name": "ref_host",
+          "derived_from": [],
+          "expression": "F.regexp_extract(F.col('referrer'), 'https?://([^/]+)/', 1)",
+          "transformation": "withColumn"
+        },
+        {
+          "name": "url_host",
+          "derived_from": [],
+          "expression": "F.regexp_extract(F.col('url'), 'https?://([^/]+)/', 1)",
+          "transformation": "withColumn"
+        },
+        {
+          "name": "event_date",
+          "derived_from": [],
+          "expression": "F.to_date('event_ts')",
+          "transformation": "withColumn"
+        },
+        {
+          "name": "event_ts",
+          "derived_from": [],
+          "expression": "F.to_timestamp('event_ts')",
+          "transformation": "withColumn"
+        }
+      ],
+      "lineage": [
+        {
+          "target_col": "ref_host",
+          "sources": []
+        },
+        {
+          "target_col": "url_host",
+          "sources": []
+        },
+        {
+          "target_col": "event_date",
+          "sources": []
+        },
+        {
+          "target_col": "event_ts",
+          "sources": []
+        }
+      ]
+    },
+    {
+      "df_name": "w",
+      "type": "intermediate",
+      "columns": [],
+      "lineage": []
+    },
+    {
+      "df_name": "df2",
+      "type": "intermediate",
+      "columns": [
+        {
+          "name": "prev_ts",
+          "derived_from": [],
+          "expression": "F.lag('event_ts').over(w)",
+          "transformation": "withColumn"
+        }
+      ],
+      "lineage": [
+        {
+          "target_col": "prev_ts",
+          "sources": []
+        }
+      ]
+    },
+    {
+      "df_name": "df3",
+      "type": "intermediate",
+      "columns": [
+        {
+          "name": "gap_min",
+          "derived_from": [],
+          "expression": "(F.col('event_ts').cast('long') - F.col('prev_ts').cast('long')) / 60.0",
+          "transformation": "withColumn"
+        }
+      ],
+      "lineage": [
+        {
+          "target_col": "gap_min",
+          "sources": []
+        }
+      ]
+    },
+    {
+      "df_name": "df4",
+      "type": "intermediate",
+      "columns": [
+        {
+          "name": "new_session_flag",
+          "derived_from": [],
+          "expression": "F.when(F.col('gap_min').isNull() | (F.col('gap_min') > 30), 1).otherwise(0)",
+          "transformation": "withColumn"
+        }
+      ],
+      "lineage": [
+        {
+          "target_col": "new_session_flag",
+          "sources": []
+        }
+      ]
+    },
+    {
+      "df_name": "df5",
+      "type": "intermediate",
+      "columns": [
+        {
+          "name": "session_num",
+          "derived_from": [],
+          "expression": "F.sum('new_session_flag').over(w)",
+          "transformation": "withColumn"
+        }
+      ],
+      "lineage": [
+        {
+          "target_col": "session_num",
+          "sources": []
+        }
+      ]
+    },
+    {
+      "df_name": "df6",
+      "type": "intermediate",
+      "columns": [
+        {
+          "name": "session_id",
+          "derived_from": [],
+          "expression": "F.concat_ws('-', F.col('customer_id'), F.col('event_date'), F.col('session_num'))",
+          "transformation": "withColumn"
+        }
+      ],
+      "lineage": [
+        {
+          "target_col": "session_id",
+          "sources": []
+        }
+      ]
+    },
+    {
+      "df_name": "agg_sql",
+      "type": "intermediate",
+      "columns": [],
+      "lineage": []
+    },
+    {
+      "df_name": "sess_agg",
+      "type": "intermediate",
+      "columns": [],
+      "lineage": []
+    },
+    {
+      "df_name": "out",
+      "type": "intermediate",
+      "columns": [],
+      "lineage": []
+    },
+    {
+      "df_name": "spark",
+      "type": "sink",
+      "columns": [],
+      "lineage": []
+    }
+  ],
   "assets": {
-    "reads": [],
-    "writes": []
+    "reads": [
+      {
+        "format": "parquet",
+        "path": "s3a://my-bucket/raw/web_clicks/"
+      }
+    ],
+    "writes": [
+      {
+        "format": "createOrReplaceTempView",
+        "path": "sessions",
+        "df": "df6"
+      },
+      {
+        "format": "parquet",
+        "path": "s3a://my-bucket/gold/web_sessions/",
+        "df": "parquet"
+      }
+    ]
   },
   "bedrock_enrichment": {
     "group_by": [
       {
-        "df": "sessions",
+        "df": "sess_agg",
         "keys": [
           "customer_id",
           "session_id"
@@ -17,7 +208,7 @@
     ],
     "aggregations": [
       {
-        "df": "sessions",
+        "df": "sess_agg",
         "expr": "MIN(event_ts)",
         "source_cols": [
           "event_ts"
@@ -25,7 +216,7 @@
         "alias": "session_start_ts"
       },
       {
-        "df": "sessions",
+        "df": "sess_agg",
         "expr": "MAX(event_ts)",
         "source_cols": [
           "event_ts"
@@ -33,7 +224,7 @@
         "alias": "session_end_ts"
       },
       {
-        "df": "sessions",
+        "df": "sess_agg",
         "expr": "COUNT(1)",
         "source_cols": [
           "*"
@@ -41,7 +232,7 @@
         "alias": "events"
       },
       {
-        "df": "sessions",
+        "df": "sess_agg",
         "expr": "COUNT(DISTINCT url_host)",
         "source_cols": [
           "url_host"
@@ -51,41 +242,41 @@
     ],
     "derived_columns": [
       {
-        "df": "clicks",
-        "col": "event_ts",
-        "expression": "to_timestamp(event_ts)",
-        "source_cols": [
-          "event_ts"
-        ]
-      },
-      {
-        "df": "clicks",
-        "col": "event_date",
-        "expression": "to_date(event_ts)",
-        "source_cols": [
-          "event_ts"
-        ]
-      },
-      {
-        "df": "clicks",
-        "col": "url_host",
-        "expression": "regexp_extract(url, 'https?://([^/]+)/', 1)",
-        "source_cols": [
-          "url"
-        ]
-      },
-      {
-        "df": "clicks",
+        "df": "df",
         "col": "ref_host",
-        "expression": "regexp_extract(referrer, 'https?://([^/]+)/', 1)",
+        "expression": "F.regexp_extract(F.col('referrer'), 'https?://([^/]+)/', 1)",
         "source_cols": [
           "referrer"
         ]
       },
       {
+        "df": "df",
+        "col": "url_host",
+        "expression": "F.regexp_extract(F.col('url'), 'https?://([^/]+)/', 1)",
+        "source_cols": [
+          "url"
+        ]
+      },
+      {
+        "df": "df",
+        "col": "event_date",
+        "expression": "F.to_date('event_ts')",
+        "source_cols": [
+          "event_ts"
+        ]
+      },
+      {
+        "df": "df",
+        "col": "event_ts",
+        "expression": "F.to_timestamp('event_ts')",
+        "source_cols": [
+          "event_ts"
+        ]
+      },
+      {
         "df": "df2",
         "col": "prev_ts",
-        "expression": "lag(event_ts).over(w)",
+        "expression": "F.lag('event_ts').over(w)",
         "source_cols": [
           "event_ts"
         ]
@@ -93,7 +284,7 @@
       {
         "df": "df3",
         "col": "gap_min",
-        "expression": "(col(event_ts).cast('long') - col(prev_ts).cast('long')) / 60.0",
+        "expression": "(F.col('event_ts').cast('long') - F.col('prev_ts').cast('long')) / 60.0",
         "source_cols": [
           "event_ts",
           "prev_ts"
@@ -102,7 +293,7 @@
       {
         "df": "df4",
         "col": "new_session_flag",
-        "expression": "when((col(gap_min).isNull()) | (col(gap_min) > 30), 1).otherwise(0)",
+        "expression": "F.when(F.col('gap_min').isNull() | (F.col('gap_min') > 30), 1).otherwise(0)",
         "source_cols": [
           "gap_min"
         ]
@@ -110,7 +301,7 @@
       {
         "df": "df5",
         "col": "session_num",
-        "expression": "sum(new_session_flag).over(w)",
+        "expression": "F.sum('new_session_flag').over(w)",
         "source_cols": [
           "new_session_flag"
         ]
@@ -118,7 +309,7 @@
       {
         "df": "df6",
         "col": "session_id",
-        "expression": "concat_ws('-', col(customer_id), col(event_date), col(session_num))",
+        "expression": "F.concat_ws('-', F.col('customer_id'), F.col('event_date'), F.col('session_num'))",
         "source_cols": [
           "customer_id",
           "event_date",

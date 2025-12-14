@@ -1,38 +1,77 @@
 {
   "script_name": "script_09_sql_merge_inventory.py",
-  "dataframes": [],
+  "dataframes": [
+    {
+      "df_name": "inv",
+      "type": "source",
+      "columns": [
+        {
+          "name": "updated_at",
+          "derived_from": [],
+          "expression": "F.to_timestamp('updated_at')",
+          "transformation": "withColumn"
+        }
+      ],
+      "lineage": [
+        {
+          "target_col": "updated_at",
+          "sources": []
+        }
+      ]
+    },
+    {
+      "df_name": "spark",
+      "type": "sink",
+      "columns": [],
+      "lineage": []
+    }
+  ],
   "assets": {
-    "reads": [],
-    "writes": []
+    "reads": [
+      {
+        "format": "parquet",
+        "path": "s3a://my-bucket/raw/inventory_updates/"
+      }
+    ],
+    "writes": [
+      {
+        "format": "createOrReplaceTempView",
+        "path": "inv_updates",
+        "df": "inv"
+      },
+      {
+        "format": "sql",
+        "path": "\n      CREATE TABLE IF NOT EXISTS delta_inventory\n      USING delta\n      LOCATION 's3a://my-bucket/delta/inventory/'\n    ",
+        "df": "spark"
+      },
+      {
+        "format": "sql",
+        "path": "\n      MERGE INTO delta_inventory t\n      USING inv_updates s\n      ON t.sku = s.sku AND t.warehouse = s.warehouse\n      WHEN MATCHED AND s.updated_at >= t.updated_at THEN\n        UPDATE SET\n          t.on_hand = s.on_hand,\n          t.updated_at = s.updated_at\n      WHEN NOT MATCHED THEN\n        INSERT (sku, warehouse, on_hand, updated_at)\n        VALUES (s.sku, s.warehouse, s.on_hand, s.updated_at)\n    ",
+        "df": "spark"
+      }
+    ]
   },
   "bedrock_enrichment": {
     "group_by": [],
     "aggregations": [],
-    "derived_columns": [],
-    "joins": [
+    "derived_columns": [
       {
-        "df": "delta_inventory",
-        "left_df": "t",
-        "right_df": "inv_updates",
-        "how": "merge",
-        "on": [
-          "sku",
-          "warehouse"
-        ],
-        "conditions": "t.sku = s.sku AND t.warehouse = s.warehouse"
+        "df": "inv",
+        "col": "updated_at",
+        "expression": "F.to_timestamp('updated_at')",
+        "source_cols": []
       }
     ],
+    "joins": [],
     "sql_blocks": [
       {
-        "name": "delta_inventory_create",
+        "name": "delta_inventory_creation",
         "sql": "CREATE TABLE IF NOT EXISTS delta_inventory USING delta LOCATION's3a://my-bucket/delta/inventory/'",
-        "tables": [
-          "delta_inventory"
-        ],
+        "tables": [],
         "columns": []
       },
       {
-        "name": "delta_inventory_merge",
+        "name": "merge_into_delta_inventory",
         "sql": "MERGE INTO delta_inventory t USING inv_updates s ON t.sku = s.sku AND t.warehouse = s.warehouse WHEN MATCHED AND s.updated_at >= t.updated_at THEN UPDATE SET t.on_hand = s.on_hand, t.updated_at = s.updated_at WHEN NOT MATCHED THEN INSERT (sku, warehouse, on_hand, updated_at) VALUES (s.sku, s.warehouse, s.on_hand, s.updated_at)",
         "tables": [
           "delta_inventory",

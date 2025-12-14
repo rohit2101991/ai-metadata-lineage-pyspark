@@ -1,8 +1,106 @@
 {
   "script_name": "script_01_bronze_ingest_orders.py",
-  "dataframes": [],
+  "dataframes": [
+    {
+      "df_name": "src",
+      "type": "source",
+      "columns": []
+    },
+    {
+      "df_name": "df",
+      "type": "intermediate",
+      "columns": []
+    },
+    {
+      "df_name": "df1",
+      "type": "intermediate",
+      "columns": [
+        {
+          "name": "abs_amount",
+          "derived_from": [],
+          "expression": "F.abs(F.col('amount'))",
+          "transformation": "withColumn"
+        },
+        {
+          "name": "is_refund",
+          "derived_from": [],
+          "expression": "F.when(F.col('amount') < 0, F.lit(1)).otherwise(F.lit(0))",
+          "transformation": "withColumn"
+        },
+        {
+          "name": "country",
+          "derived_from": [],
+          "expression": "F.upper(F.coalesce(F.col('country'), F.lit('US')))",
+          "transformation": "withColumn"
+        },
+        {
+          "name": "channel",
+          "derived_from": [],
+          "expression": "F.lower(F.coalesce(F.col('channel'), F.lit('unknown')))",
+          "transformation": "withColumn"
+        },
+        {
+          "name": "currency",
+          "derived_from": [],
+          "expression": "F.upper(F.coalesce(F.col('currency'), F.lit('USD')))",
+          "transformation": "withColumn"
+        },
+        {
+          "name": "amount",
+          "derived_from": [],
+          "expression": "F.coalesce(F.col('amount').cast('double'), F.lit(0.0))",
+          "transformation": "withColumn"
+        },
+        {
+          "name": "order_id",
+          "derived_from": [],
+          "expression": "F.col('order_id').cast('string')",
+          "transformation": "withColumn"
+        },
+        {
+          "name": "customer_id",
+          "derived_from": [],
+          "expression": "F.col('customer_id').cast('string')",
+          "transformation": "withColumn"
+        },
+        {
+          "name": "order_date",
+          "derived_from": [],
+          "expression": "F.to_date('order_ts')",
+          "transformation": "withColumn"
+        },
+        {
+          "name": "order_ts",
+          "derived_from": [],
+          "expression": "F.to_timestamp('order_ts')",
+          "transformation": "withColumn"
+        }
+      ]
+    },
+    {
+      "df_name": "out",
+      "type": "intermediate",
+      "columns": []
+    },
+    {
+      "df_name": "spark",
+      "type": "sink",
+      "columns": []
+    }
+  ],
   "assets": {
-    "reads": [],
-    "writes": []
+    "reads": [
+      {
+        "format": "option",
+        "path": "header"
+      }
+    ],
+    "writes": [
+      {
+        "format": "parquet",
+        "path": "s3a://my-bucket/bronze/orders/",
+        "df": "parquet"
+      }
+    ]
   }
 }

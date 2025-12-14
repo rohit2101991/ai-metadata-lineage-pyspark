@@ -1,8 +1,130 @@
 {
   "script_name": "script_05_sales_margin_rank.py",
-  "dataframes": [],
+  "dataframes": [
+    {
+      "df_name": "fact",
+      "type": "source",
+      "columns": []
+    },
+    {
+      "df_name": "dim_prod",
+      "type": "intermediate",
+      "columns": []
+    },
+    {
+      "df_name": "line_items",
+      "type": "intermediate",
+      "columns": []
+    },
+    {
+      "df_name": "df",
+      "type": "intermediate",
+      "columns": [
+        {
+          "name": "est_margin_pct",
+          "derived_from": [],
+          "expression": "F.when(F.col('gross_sales') == 0, F.lit(None)).otherwise(F.col('est_margin') / F.col('gross_sales'))",
+          "transformation": "withColumn"
+        },
+        {
+          "name": "est_margin",
+          "derived_from": [],
+          "expression": "F.col('gross_sales') - F.col('est_cost')",
+          "transformation": "withColumn"
+        },
+        {
+          "name": "est_cost",
+          "derived_from": [],
+          "expression": "F.col('qty') * F.coalesce(F.col('p.cost'), F.lit(0.0))",
+          "transformation": "withColumn"
+        },
+        {
+          "name": "qty",
+          "derived_from": [],
+          "expression": "F.coalesce(F.col('qty').cast('int'), F.lit(1))",
+          "transformation": "withColumn"
+        },
+        {
+          "name": "gross_sales",
+          "derived_from": [],
+          "expression": "F.col('f.abs_amount')",
+          "transformation": "withColumn"
+        },
+        {
+          "name": "__join__unknown",
+          "derived_from": [],
+          "expression": "join(None) on None (None)",
+          "transformation": "join"
+        },
+        {
+          "name": "__join__unknown",
+          "derived_from": [],
+          "expression": "join(None) on None (None)",
+          "transformation": "join"
+        }
+      ]
+    },
+    {
+      "df_name": "w",
+      "type": "intermediate",
+      "columns": []
+    },
+    {
+      "df_name": "df2",
+      "type": "intermediate",
+      "columns": [
+        {
+          "name": "top_10_flag",
+          "derived_from": [],
+          "expression": "F.when(F.col('margin_rank_day') <= 10, 1).otherwise(0)",
+          "transformation": "withColumn"
+        },
+        {
+          "name": "margin_dense_rank_day",
+          "derived_from": [],
+          "expression": "F.dense_rank().over(w)",
+          "transformation": "withColumn"
+        },
+        {
+          "name": "margin_rank_day",
+          "derived_from": [],
+          "expression": "F.rank().over(w)",
+          "transformation": "withColumn"
+        }
+      ]
+    },
+    {
+      "df_name": "out",
+      "type": "intermediate",
+      "columns": []
+    },
+    {
+      "df_name": "spark",
+      "type": "sink",
+      "columns": []
+    }
+  ],
   "assets": {
-    "reads": [],
-    "writes": []
+    "reads": [
+      {
+        "format": "parquet",
+        "path": "s3a://my-bucket/gold/fact_orders_enriched/"
+      },
+      {
+        "format": "parquet",
+        "path": "s3a://my-bucket/silver/dim_product/"
+      },
+      {
+        "format": "parquet",
+        "path": "s3a://my-bucket/raw/order_items/"
+      }
+    ],
+    "writes": [
+      {
+        "format": "parquet",
+        "path": "s3a://my-bucket/gold/sales_margin_ranked/",
+        "df": "parquet"
+      }
+    ]
   }
 }

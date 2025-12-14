@@ -1,8 +1,97 @@
 {
   "script_name": "script_03_fact_orders_enriched.py",
-  "dataframes": [],
+  "dataframes": [
+    {
+      "df_name": "orders",
+      "type": "source",
+      "columns": []
+    },
+    {
+      "df_name": "dim_cust",
+      "type": "intermediate",
+      "columns": []
+    },
+    {
+      "df_name": "df",
+      "type": "intermediate",
+      "columns": [
+        {
+          "name": "__join__unknown",
+          "derived_from": [],
+          "expression": "join(None) on None (None)",
+          "transformation": "join"
+        }
+      ]
+    },
+    {
+      "df_name": "w",
+      "type": "intermediate",
+      "columns": []
+    },
+    {
+      "df_name": "df2",
+      "type": "intermediate",
+      "columns": [
+        {
+          "name": "rolling_30_orders_sum",
+          "derived_from": [],
+          "expression": "F.sum('abs_amount').over(w.rowsBetween(-29, 0))",
+          "transformation": "withColumn"
+        },
+        {
+          "name": "rolling_7_orders_sum",
+          "derived_from": [],
+          "expression": "F.sum('abs_amount').over(w.rowsBetween(-6, 0))",
+          "transformation": "withColumn"
+        },
+        {
+          "name": "amount_delta_prev",
+          "derived_from": [],
+          "expression": "F.col('abs_amount') - F.coalesce(F.col('prev_amount'), F.lit(0.0))",
+          "transformation": "withColumn"
+        },
+        {
+          "name": "next_amount",
+          "derived_from": [],
+          "expression": "F.lead('abs_amount', 1).over(w)",
+          "transformation": "withColumn"
+        },
+        {
+          "name": "prev_amount",
+          "derived_from": [],
+          "expression": "F.lag('abs_amount', 1).over(w)",
+          "transformation": "withColumn"
+        }
+      ]
+    },
+    {
+      "df_name": "out",
+      "type": "intermediate",
+      "columns": []
+    },
+    {
+      "df_name": "spark",
+      "type": "sink",
+      "columns": []
+    }
+  ],
   "assets": {
-    "reads": [],
-    "writes": []
+    "reads": [
+      {
+        "format": "parquet",
+        "path": "s3a://my-bucket/bronze/orders/"
+      },
+      {
+        "format": "parquet",
+        "path": "s3a://my-bucket/silver/dim_customer/"
+      }
+    ],
+    "writes": [
+      {
+        "format": "parquet",
+        "path": "s3a://my-bucket/gold/fact_orders_enriched/",
+        "df": "parquet"
+      }
+    ]
   }
 }

@@ -1,8 +1,115 @@
 {
   "script_name": "script_07_fraud_scoring.py",
-  "dataframes": [],
+  "dataframes": [
+    {
+      "df_name": "fact",
+      "type": "source",
+      "columns": []
+    },
+    {
+      "df_name": "sessions",
+      "type": "intermediate",
+      "columns": []
+    },
+    {
+      "df_name": "df",
+      "type": "intermediate",
+      "columns": [
+        {
+          "name": "raw_risk_score",
+          "derived_from": [],
+          "expression": "F.col('high_value_flag') + F.col('risk_from_channel') + F.col('risk_from_refund') + F.col('risk_from_sessions')",
+          "transformation": "withColumn"
+        },
+        {
+          "name": "risk_from_sessions",
+          "derived_from": [],
+          "expression": "F.when(F.col('s.events') >= 50, 2).when(F.col('s.events') >= 20, 1).otherwise(0)",
+          "transformation": "withColumn"
+        },
+        {
+          "name": "risk_from_refund",
+          "derived_from": [],
+          "expression": "F.when(F.col('f.is_refund') == 1, 3).otherwise(0)",
+          "transformation": "withColumn"
+        },
+        {
+          "name": "risk_from_channel",
+          "derived_from": [],
+          "expression": "F.when(F.col('f.channel').isin('unknown', 'affiliate'), 2).when(F.col('f.channel') == 'web', 1).otherwise(0)",
+          "transformation": "withColumn"
+        },
+        {
+          "name": "high_value_flag",
+          "derived_from": [],
+          "expression": "F.when(F.col('f.abs_amount') >= 500, 1).otherwise(0)",
+          "transformation": "withColumn"
+        },
+        {
+          "name": "__join__unknown",
+          "derived_from": [],
+          "expression": "join(None) on None (None)",
+          "transformation": "join"
+        }
+      ]
+    },
+    {
+      "df_name": "w",
+      "type": "intermediate",
+      "columns": []
+    },
+    {
+      "df_name": "df2",
+      "type": "intermediate",
+      "columns": [
+        {
+          "name": "risk_bucket",
+          "derived_from": [],
+          "expression": "F.when(F.col('risk_percent_rank_day') >= 0.99, 'critical').when(F.col('risk_percent_rank_day') >= 0.95, 'high').when(F.col('risk_percent_rank_day') >= 0.8, 'medium').otherwise('low')",
+          "transformation": "withColumn"
+        },
+        {
+          "name": "risk_percent_rank_day",
+          "derived_from": [],
+          "expression": "F.percent_rank().over(w)",
+          "transformation": "withColumn"
+        },
+        {
+          "name": "risk_rank_day",
+          "derived_from": [],
+          "expression": "F.rank().over(w)",
+          "transformation": "withColumn"
+        }
+      ]
+    },
+    {
+      "df_name": "out",
+      "type": "intermediate",
+      "columns": []
+    },
+    {
+      "df_name": "spark",
+      "type": "sink",
+      "columns": []
+    }
+  ],
   "assets": {
-    "reads": [],
-    "writes": []
+    "reads": [
+      {
+        "format": "parquet",
+        "path": "s3a://my-bucket/gold/fact_orders_enriched/"
+      },
+      {
+        "format": "parquet",
+        "path": "s3a://my-bucket/gold/web_sessions/"
+      }
+    ],
+    "writes": [
+      {
+        "format": "parquet",
+        "path": "s3a://my-bucket/gold/fact_orders_risk_scored/",
+        "df": "parquet"
+      }
+    ]
   }
 }

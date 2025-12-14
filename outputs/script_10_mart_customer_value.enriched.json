@@ -1,9 +1,86 @@
 {
   "script_name": "script_10_mart_customer_value.py",
-  "dataframes": [],
+  "dataframes": [
+    {
+      "df_name": "orders",
+      "type": "source",
+      "columns": [],
+      "lineage": []
+    },
+    {
+      "df_name": "risk",
+      "type": "intermediate",
+      "columns": [],
+      "lineage": []
+    },
+    {
+      "df_name": "cust",
+      "type": "intermediate",
+      "columns": [],
+      "lineage": []
+    },
+    {
+      "df_name": "sql",
+      "type": "intermediate",
+      "columns": [],
+      "lineage": []
+    },
+    {
+      "df_name": "mart",
+      "type": "intermediate",
+      "columns": [],
+      "lineage": []
+    },
+    {
+      "df_name": "out",
+      "type": "intermediate",
+      "columns": [],
+      "lineage": []
+    },
+    {
+      "df_name": "spark",
+      "type": "sink",
+      "columns": [],
+      "lineage": []
+    }
+  ],
   "assets": {
-    "reads": [],
-    "writes": []
+    "reads": [
+      {
+        "format": "parquet",
+        "path": "s3a://my-bucket/gold/fact_orders_enriched/"
+      },
+      {
+        "format": "parquet",
+        "path": "s3a://my-bucket/gold/fact_orders_risk_scored/"
+      },
+      {
+        "format": "parquet",
+        "path": "s3a://my-bucket/silver/dim_customer/"
+      }
+    ],
+    "writes": [
+      {
+        "format": "createOrReplaceTempView",
+        "path": "orders",
+        "df": "orders"
+      },
+      {
+        "format": "createOrReplaceTempView",
+        "path": "risk",
+        "df": "risk"
+      },
+      {
+        "format": "createOrReplaceTempView",
+        "path": "cust",
+        "df": "cust"
+      },
+      {
+        "format": "parquet",
+        "path": "s3a://my-bucket/gold/mart_customer_value/",
+        "df": "parquet"
+      }
+    ]
   },
   "bedrock_enrichment": {
     "group_by": [
@@ -98,37 +175,21 @@
     ],
     "derived_columns": [
       {
-        "df": "daily",
-        "col": "raw_risk_score",
-        "expression": "COALESCE(r.raw_risk_score, 0)",
-        "source_cols": [
-          "r.raw_risk_score"
-        ]
-      },
-      {
-        "df": "daily",
-        "col": "risk_bucket",
-        "expression": "COALESCE(r.risk_bucket, 'unknown')",
-        "source_cols": [
-          "r.risk_bucket"
-        ]
-      },
-      {
-        "df": "mart",
+        "df": "sql",
         "col": "net_spend",
         "expression": "(cr.total_spend - cr.total_refunds)",
         "source_cols": [
-          "cr.total_spend",
-          "cr.total_refunds"
+          "total_spend",
+          "total_refunds"
         ]
       },
       {
-        "df": "mart",
+        "df": "sql",
         "col": "customer_segment",
         "expression": "CASE WHEN cr.total_spend >= 10000 AND cr.ever_high_risk = 0 THEN 'VIP_SAFE' WHEN cr.total_spend >= 10000 AND cr.ever_high_risk = 1 THEN 'VIP_RISK' WHEN cr.total_spend >= 2000 THEN 'HIGH_VALUE' ELSE 'STANDARD' END",
         "source_cols": [
-          "cr.total_spend",
-          "cr.ever_high_risk"
+          "total_spend",
+          "ever_high_risk"
         ]
       }
     ],
@@ -139,17 +200,17 @@
         "right_df": "risk",
         "how": "left",
         "on": [
-          "o.order_id = r.order_id"
+          "order_id"
         ],
         "conditions": "o.order_id = r.order_id"
       },
       {
-        "df": "mart",
+        "df": "sql",
         "left_df": "cust",
         "right_df": "customer_rollup",
         "how": "left",
         "on": [
-          "c.customer_id = cr.customer_id"
+          "customer_id"
         ],
         "conditions": "c.customer_id = cr.customer_id"
       }
@@ -162,25 +223,18 @@
           "orders",
           "risk",
           "cust",
+          "daily",
           "customer_rollup"
         ],
         "columns": [
           "customer_id",
-          "order_date",
-          "abs_amount",
-          "is_refund",
-          "raw_risk_score",
-          "risk_bucket",
-          "daily_spend",
-          "daily_refund_amt",
-          "max_risk_score_day",
-          "any_high_risk_day",
+          "customer_tier",
           "total_spend",
           "total_refunds",
+          "net_spend",
           "avg_daily_spend",
           "max_risk_score",
           "ever_high_risk",
-          "net_spend",
           "customer_segment"
         ]
       }

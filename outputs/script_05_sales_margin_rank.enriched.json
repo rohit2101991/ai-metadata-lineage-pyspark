@@ -1,9 +1,177 @@
 {
   "script_name": "script_05_sales_margin_rank.py",
-  "dataframes": [],
+  "dataframes": [
+    {
+      "df_name": "fact",
+      "type": "source",
+      "columns": [],
+      "lineage": []
+    },
+    {
+      "df_name": "dim_prod",
+      "type": "intermediate",
+      "columns": [],
+      "lineage": []
+    },
+    {
+      "df_name": "line_items",
+      "type": "intermediate",
+      "columns": [],
+      "lineage": []
+    },
+    {
+      "df_name": "df",
+      "type": "intermediate",
+      "columns": [
+        {
+          "name": "est_margin_pct",
+          "derived_from": [],
+          "expression": "F.when(F.col('gross_sales') == 0, F.lit(None)).otherwise(F.col('est_margin') / F.col('gross_sales'))",
+          "transformation": "withColumn"
+        },
+        {
+          "name": "est_margin",
+          "derived_from": [],
+          "expression": "F.col('gross_sales') - F.col('est_cost')",
+          "transformation": "withColumn"
+        },
+        {
+          "name": "est_cost",
+          "derived_from": [],
+          "expression": "F.col('qty') * F.coalesce(F.col('p.cost'), F.lit(0.0))",
+          "transformation": "withColumn"
+        },
+        {
+          "name": "qty",
+          "derived_from": [],
+          "expression": "F.coalesce(F.col('qty').cast('int'), F.lit(1))",
+          "transformation": "withColumn"
+        },
+        {
+          "name": "gross_sales",
+          "derived_from": [],
+          "expression": "F.col('f.abs_amount')",
+          "transformation": "withColumn"
+        },
+        {
+          "name": "__join__unknown",
+          "derived_from": [],
+          "expression": "join(None) on None (None)",
+          "transformation": "join"
+        },
+        {
+          "name": "__join__unknown",
+          "derived_from": [],
+          "expression": "join(None) on None (None)",
+          "transformation": "join"
+        }
+      ],
+      "lineage": [
+        {
+          "target_col": "est_margin_pct",
+          "sources": []
+        },
+        {
+          "target_col": "est_margin",
+          "sources": []
+        },
+        {
+          "target_col": "est_cost",
+          "sources": []
+        },
+        {
+          "target_col": "qty",
+          "sources": []
+        },
+        {
+          "target_col": "gross_sales",
+          "sources": []
+        },
+        {
+          "target_col": "__join__unknown",
+          "sources": []
+        }
+      ]
+    },
+    {
+      "df_name": "w",
+      "type": "intermediate",
+      "columns": [],
+      "lineage": []
+    },
+    {
+      "df_name": "df2",
+      "type": "intermediate",
+      "columns": [
+        {
+          "name": "top_10_flag",
+          "derived_from": [],
+          "expression": "F.when(F.col('margin_rank_day') <= 10, 1).otherwise(0)",
+          "transformation": "withColumn"
+        },
+        {
+          "name": "margin_dense_rank_day",
+          "derived_from": [],
+          "expression": "F.dense_rank().over(w)",
+          "transformation": "withColumn"
+        },
+        {
+          "name": "margin_rank_day",
+          "derived_from": [],
+          "expression": "F.rank().over(w)",
+          "transformation": "withColumn"
+        }
+      ],
+      "lineage": [
+        {
+          "target_col": "top_10_flag",
+          "sources": []
+        },
+        {
+          "target_col": "margin_dense_rank_day",
+          "sources": []
+        },
+        {
+          "target_col": "margin_rank_day",
+          "sources": []
+        }
+      ]
+    },
+    {
+      "df_name": "out",
+      "type": "intermediate",
+      "columns": [],
+      "lineage": []
+    },
+    {
+      "df_name": "spark",
+      "type": "sink",
+      "columns": [],
+      "lineage": []
+    }
+  ],
   "assets": {
-    "reads": [],
-    "writes": []
+    "reads": [
+      {
+        "format": "parquet",
+        "path": "s3a://my-bucket/gold/fact_orders_enriched/"
+      },
+      {
+        "format": "parquet",
+        "path": "s3a://my-bucket/silver/dim_product/"
+      },
+      {
+        "format": "parquet",
+        "path": "s3a://my-bucket/raw/order_items/"
+      }
+    ],
+    "writes": [
+      {
+        "format": "parquet",
+        "path": "s3a://my-bucket/gold/sales_margin_ranked/",
+        "df": "parquet"
+      }
+    ]
   },
   "bedrock_enrichment": {
     "group_by": [],
@@ -12,65 +180,50 @@
       {
         "df": "df",
         "col": "gross_sales",
-        "expression": "f.abs_amount",
-        "source_cols": [
-          "f.abs_amount"
-        ]
+        "expression": "F.col('f.abs_amount')",
+        "source_cols": []
       },
       {
         "df": "df",
         "col": "qty",
-        "expression": "coalesce(i.qty.cast(\"int\"), lit(1))",
-        "source_cols": [
-          "i.qty"
-        ]
+        "expression": "F.coalesce(F.col('qty').cast('int'), F.lit(1))",
+        "source_cols": []
       },
       {
         "df": "df",
         "col": "est_cost",
-        "expression": "qty * coalesce(p.cost, lit(0.0))",
-        "source_cols": [
-          "qty",
-          "p.cost"
-        ]
+        "expression": "F.col('qty') * F.coalesce(F.col('p.cost'), F.lit(0.0))",
+        "source_cols": []
       },
       {
         "df": "df",
         "col": "est_margin",
-        "expression": "gross_sales - est_cost",
-        "source_cols": [
-          "gross_sales",
-          "est_cost"
-        ]
+        "expression": "F.col('gross_sales') - F.col('est_cost')",
+        "source_cols": []
       },
       {
         "df": "df",
         "col": "est_margin_pct",
-        "expression": "when(gross_sales == 0, lit(None)).otherwise(est_margin / gross_sales)",
-        "source_cols": [
-          "gross_sales",
-          "est_margin"
-        ]
+        "expression": "F.when(F.col('gross_sales') == 0, F.lit(None)).otherwise(F.col('est_margin') / F.col('gross_sales'))",
+        "source_cols": []
       },
       {
         "df": "df2",
         "col": "margin_rank_day",
-        "expression": "rank().over(w)",
+        "expression": "F.rank().over(w)",
         "source_cols": []
       },
       {
         "df": "df2",
         "col": "margin_dense_rank_day",
-        "expression": "dense_rank().over(w)",
+        "expression": "F.dense_rank().over(w)",
         "source_cols": []
       },
       {
         "df": "df2",
         "col": "top_10_flag",
-        "expression": "when(margin_rank_day <= 10, 1).otherwise(0)",
-        "source_cols": [
-          "margin_rank_day"
-        ]
+        "expression": "F.when(F.col('margin_rank_day') <= 10, 1).otherwise(0)",
+        "source_cols": []
       }
     ],
     "joins": [

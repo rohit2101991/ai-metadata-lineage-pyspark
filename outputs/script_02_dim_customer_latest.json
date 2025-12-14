@@ -1,8 +1,81 @@
 {
   "script_name": "script_02_dim_customer_latest.py",
-  "dataframes": [],
+  "dataframes": [
+    {
+      "df_name": "src",
+      "type": "source",
+      "columns": []
+    },
+    {
+      "df_name": "df",
+      "type": "intermediate",
+      "columns": []
+    },
+    {
+      "df_name": "w",
+      "type": "intermediate",
+      "columns": []
+    },
+    {
+      "df_name": "df2",
+      "type": "intermediate",
+      "columns": [
+        {
+          "name": "email_domain",
+          "derived_from": [],
+          "expression": "F.lower(F.regexp_extract(F.col('email'), '@(.+)$', 1))",
+          "transformation": "withColumn"
+        },
+        {
+          "name": "customer_tier",
+          "derived_from": [],
+          "expression": "F.when(F.col('lifetime_value') >= 10000, 'platinum').when(F.col('lifetime_value') >= 5000, 'gold').when(F.col('lifetime_value') >= 1000, 'silver').otherwise('bronze')",
+          "transformation": "withColumn"
+        },
+        {
+          "name": "drnk",
+          "derived_from": [],
+          "expression": "F.dense_rank().over(w)",
+          "transformation": "withColumn"
+        },
+        {
+          "name": "rnk",
+          "derived_from": [],
+          "expression": "F.rank().over(w)",
+          "transformation": "withColumn"
+        },
+        {
+          "name": "rn",
+          "derived_from": [],
+          "expression": "F.row_number().over(w)",
+          "transformation": "withColumn"
+        }
+      ]
+    },
+    {
+      "df_name": "out",
+      "type": "intermediate",
+      "columns": []
+    },
+    {
+      "df_name": "spark",
+      "type": "sink",
+      "columns": []
+    }
+  ],
   "assets": {
-    "reads": [],
-    "writes": []
+    "reads": [
+      {
+        "format": "parquet",
+        "path": "s3a://my-bucket/raw/customers/"
+      }
+    ],
+    "writes": [
+      {
+        "format": "parquet",
+        "path": "s3a://my-bucket/silver/dim_customer/",
+        "df": "parquet"
+      }
+    ]
   }
 }

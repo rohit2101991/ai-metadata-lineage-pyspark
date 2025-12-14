@@ -1,9 +1,62 @@
 {
   "script_name": "script_04_dim_product_sql_cte.py",
-  "dataframes": [],
+  "dataframes": [
+    {
+      "df_name": "src",
+      "type": "source",
+      "columns": [],
+      "lineage": []
+    },
+    {
+      "df_name": "df",
+      "type": "intermediate",
+      "columns": [],
+      "lineage": []
+    },
+    {
+      "df_name": "sql",
+      "type": "intermediate",
+      "columns": [],
+      "lineage": []
+    },
+    {
+      "df_name": "dim_prod",
+      "type": "intermediate",
+      "columns": [],
+      "lineage": []
+    },
+    {
+      "df_name": "out",
+      "type": "intermediate",
+      "columns": [],
+      "lineage": []
+    },
+    {
+      "df_name": "spark",
+      "type": "sink",
+      "columns": [],
+      "lineage": []
+    }
+  ],
   "assets": {
-    "reads": [],
-    "writes": []
+    "reads": [
+      {
+        "format": "parquet",
+        "path": "s3a://my-bucket/raw/products/"
+      }
+    ],
+    "writes": [
+      {
+        "format": "createOrReplaceTempView",
+        "path": "raw_products",
+        "df": "df"
+      },
+      {
+        "format": "parquet",
+        "path": "s3a://my-bucket/silver/dim_product/",
+        "df": "parquet"
+      }
+    ]
   },
   "bedrock_enrichment": {
     "group_by": [],
@@ -12,26 +65,10 @@
     "joins": [],
     "sql_blocks": [
       {
-        "name": "cleaned",
-        "sql": "WITH cleaned AS (SELECT CAST(product_id AS STRING) AS product_id, LOWER(TRIM(category)) AS category, CAST(price AS DOUBLE) AS price, CAST(cost AS DOUBLE) AS cost, UPPER(COALESCE(currency, 'USD')) AS currency, TO_DATE(updated_at) AS updated_date, CASE WHEN price IS NULL OR price <= 0 THEN 0 ELSE price END AS price_norm FROM raw_products)",
+        "name": "dim_product_sql_cte",
+        "sql": "WITH cleaned AS (SELECT CAST(product_id AS STRING) AS product_id, LOWER(TRIM(category)) AS category, CAST(price AS DOUBLE) AS price, CAST(cost AS DOUBLE) AS cost, UPPER(COALESCE(currency, 'USD')) AS currency, TO_DATE(updated_at) AS updated_date, CASE WHEN price IS NULL OR price <= 0 THEN 0 ELSE price END AS price_norm FROM raw_products), metrics AS (SELECT product_id, category, currency, updated_date, price_norm, cost, (price_norm - cost) AS unit_margin, CASE WHEN price_norm = 0 THEN NULL ELSE (price_norm - cost)/price_norm END AS margin_pct FROM cleaned) SELECT * FROM metrics",
         "tables": [
           "raw_products"
-        ],
-        "columns": [
-          "product_id",
-          "category",
-          "price",
-          "cost",
-          "currency",
-          "updated_at",
-          "price_norm"
-        ]
-      },
-      {
-        "name": "metrics",
-        "sql": "SELECT product_id, category, currency, updated_date, price_norm, cost, (price_norm - cost) AS unit_margin, CASE WHEN price_norm = 0 THEN NULL ELSE (price_norm - cost)/price_norm END AS margin_pct FROM cleaned",
-        "tables": [
-          "cleaned"
         ],
         "columns": [
           "product_id",

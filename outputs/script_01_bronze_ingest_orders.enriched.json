@@ -1,9 +1,153 @@
 {
   "script_name": "script_01_bronze_ingest_orders.py",
-  "dataframes": [],
+  "dataframes": [
+    {
+      "df_name": "src",
+      "type": "source",
+      "columns": [],
+      "lineage": []
+    },
+    {
+      "df_name": "df",
+      "type": "intermediate",
+      "columns": [],
+      "lineage": []
+    },
+    {
+      "df_name": "df1",
+      "type": "intermediate",
+      "columns": [
+        {
+          "name": "abs_amount",
+          "derived_from": [],
+          "expression": "F.abs(F.col('amount'))",
+          "transformation": "withColumn"
+        },
+        {
+          "name": "is_refund",
+          "derived_from": [],
+          "expression": "F.when(F.col('amount') < 0, F.lit(1)).otherwise(F.lit(0))",
+          "transformation": "withColumn"
+        },
+        {
+          "name": "country",
+          "derived_from": [],
+          "expression": "F.upper(F.coalesce(F.col('country'), F.lit('US')))",
+          "transformation": "withColumn"
+        },
+        {
+          "name": "channel",
+          "derived_from": [],
+          "expression": "F.lower(F.coalesce(F.col('channel'), F.lit('unknown')))",
+          "transformation": "withColumn"
+        },
+        {
+          "name": "currency",
+          "derived_from": [],
+          "expression": "F.upper(F.coalesce(F.col('currency'), F.lit('USD')))",
+          "transformation": "withColumn"
+        },
+        {
+          "name": "amount",
+          "derived_from": [],
+          "expression": "F.coalesce(F.col('amount').cast('double'), F.lit(0.0))",
+          "transformation": "withColumn"
+        },
+        {
+          "name": "order_id",
+          "derived_from": [],
+          "expression": "F.col('order_id').cast('string')",
+          "transformation": "withColumn"
+        },
+        {
+          "name": "customer_id",
+          "derived_from": [],
+          "expression": "F.col('customer_id').cast('string')",
+          "transformation": "withColumn"
+        },
+        {
+          "name": "order_date",
+          "derived_from": [],
+          "expression": "F.to_date('order_ts')",
+          "transformation": "withColumn"
+        },
+        {
+          "name": "order_ts",
+          "derived_from": [],
+          "expression": "F.to_timestamp('order_ts')",
+          "transformation": "withColumn"
+        }
+      ],
+      "lineage": [
+        {
+          "target_col": "abs_amount",
+          "sources": []
+        },
+        {
+          "target_col": "is_refund",
+          "sources": []
+        },
+        {
+          "target_col": "country",
+          "sources": []
+        },
+        {
+          "target_col": "channel",
+          "sources": []
+        },
+        {
+          "target_col": "currency",
+          "sources": []
+        },
+        {
+          "target_col": "amount",
+          "sources": []
+        },
+        {
+          "target_col": "order_id",
+          "sources": []
+        },
+        {
+          "target_col": "customer_id",
+          "sources": []
+        },
+        {
+          "target_col": "order_date",
+          "sources": []
+        },
+        {
+          "target_col": "order_ts",
+          "sources": []
+        }
+      ]
+    },
+    {
+      "df_name": "out",
+      "type": "intermediate",
+      "columns": [],
+      "lineage": []
+    },
+    {
+      "df_name": "spark",
+      "type": "sink",
+      "columns": [],
+      "lineage": []
+    }
+  ],
   "assets": {
-    "reads": [],
-    "writes": []
+    "reads": [
+      {
+        "format": "option",
+        "path": "header"
+      }
+    ],
+    "writes": [
+      {
+        "format": "parquet",
+        "path": "s3a://my-bucket/bronze/orders/",
+        "df": "parquet"
+      }
+    ]
   },
   "bedrock_enrichment": {
     "group_by": [],
@@ -12,7 +156,7 @@
       {
         "df": "df1",
         "col": "order_ts",
-        "expression": "F.to_timestamp(\"order_ts\")",
+        "expression": "F.to_timestamp('order_ts')",
         "source_cols": [
           "order_ts"
         ]
@@ -20,7 +164,7 @@
       {
         "df": "df1",
         "col": "order_date",
-        "expression": "F.to_date(\"order_ts\")",
+        "expression": "F.to_date('order_ts')",
         "source_cols": [
           "order_ts"
         ]
@@ -28,7 +172,7 @@
       {
         "df": "df1",
         "col": "customer_id",
-        "expression": "F.col(\"customer_id\").cast(\"string\")",
+        "expression": "F.col('customer_id').cast('string')",
         "source_cols": [
           "customer_id"
         ]
@@ -36,7 +180,7 @@
       {
         "df": "df1",
         "col": "order_id",
-        "expression": "F.col(\"order_id\").cast(\"string\")",
+        "expression": "F.col('order_id').cast('string')",
         "source_cols": [
           "order_id"
         ]
@@ -44,7 +188,7 @@
       {
         "df": "df1",
         "col": "amount",
-        "expression": "F.coalesce(F.col(\"amount\").cast(\"double\"), F.lit(0.0))",
+        "expression": "F.coalesce(F.col('amount').cast('double'), F.lit(0.0))",
         "source_cols": [
           "amount"
         ]
@@ -52,7 +196,7 @@
       {
         "df": "df1",
         "col": "currency",
-        "expression": "F.upper(F.coalesce(F.col(\"currency\"), F.lit(\"USD\")))",
+        "expression": "F.upper(F.coalesce(F.col('currency'), F.lit('USD')))",
         "source_cols": [
           "currency"
         ]
@@ -60,7 +204,7 @@
       {
         "df": "df1",
         "col": "channel",
-        "expression": "F.lower(F.coalesce(F.col(\"channel\"), F.lit(\"unknown\")))",
+        "expression": "F.lower(F.coalesce(F.col('channel'), F.lit('unknown')))",
         "source_cols": [
           "channel"
         ]
@@ -68,7 +212,7 @@
       {
         "df": "df1",
         "col": "country",
-        "expression": "F.upper(F.coalesce(F.col(\"country\"), F.lit(\"US\")))",
+        "expression": "F.upper(F.coalesce(F.col('country'), F.lit('US')))",
         "source_cols": [
           "country"
         ]
@@ -76,7 +220,7 @@
       {
         "df": "df1",
         "col": "is_refund",
-        "expression": "F.when(F.col(\"amount\") < 0, F.lit(1)).otherwise(F.lit(0))",
+        "expression": "F.when(F.col('amount') < 0, F.lit(1)).otherwise(F.lit(0))",
         "source_cols": [
           "amount"
         ]
@@ -84,7 +228,7 @@
       {
         "df": "df1",
         "col": "abs_amount",
-        "expression": "F.abs(F.col(\"amount\"))",
+        "expression": "F.abs(F.col('amount'))",
         "source_cols": [
           "amount"
         ]

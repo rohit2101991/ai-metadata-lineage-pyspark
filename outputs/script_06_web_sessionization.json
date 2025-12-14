@@ -1,8 +1,145 @@
 {
   "script_name": "script_06_web_sessionization.py",
-  "dataframes": [],
+  "dataframes": [
+    {
+      "df_name": "clicks",
+      "type": "source",
+      "columns": []
+    },
+    {
+      "df_name": "df",
+      "type": "intermediate",
+      "columns": [
+        {
+          "name": "ref_host",
+          "derived_from": [],
+          "expression": "F.regexp_extract(F.col('referrer'), 'https?://([^/]+)/', 1)",
+          "transformation": "withColumn"
+        },
+        {
+          "name": "url_host",
+          "derived_from": [],
+          "expression": "F.regexp_extract(F.col('url'), 'https?://([^/]+)/', 1)",
+          "transformation": "withColumn"
+        },
+        {
+          "name": "event_date",
+          "derived_from": [],
+          "expression": "F.to_date('event_ts')",
+          "transformation": "withColumn"
+        },
+        {
+          "name": "event_ts",
+          "derived_from": [],
+          "expression": "F.to_timestamp('event_ts')",
+          "transformation": "withColumn"
+        }
+      ]
+    },
+    {
+      "df_name": "w",
+      "type": "intermediate",
+      "columns": []
+    },
+    {
+      "df_name": "df2",
+      "type": "intermediate",
+      "columns": [
+        {
+          "name": "prev_ts",
+          "derived_from": [],
+          "expression": "F.lag('event_ts').over(w)",
+          "transformation": "withColumn"
+        }
+      ]
+    },
+    {
+      "df_name": "df3",
+      "type": "intermediate",
+      "columns": [
+        {
+          "name": "gap_min",
+          "derived_from": [],
+          "expression": "(F.col('event_ts').cast('long') - F.col('prev_ts').cast('long')) / 60.0",
+          "transformation": "withColumn"
+        }
+      ]
+    },
+    {
+      "df_name": "df4",
+      "type": "intermediate",
+      "columns": [
+        {
+          "name": "new_session_flag",
+          "derived_from": [],
+          "expression": "F.when(F.col('gap_min').isNull() | (F.col('gap_min') > 30), 1).otherwise(0)",
+          "transformation": "withColumn"
+        }
+      ]
+    },
+    {
+      "df_name": "df5",
+      "type": "intermediate",
+      "columns": [
+        {
+          "name": "session_num",
+          "derived_from": [],
+          "expression": "F.sum('new_session_flag').over(w)",
+          "transformation": "withColumn"
+        }
+      ]
+    },
+    {
+      "df_name": "df6",
+      "type": "intermediate",
+      "columns": [
+        {
+          "name": "session_id",
+          "derived_from": [],
+          "expression": "F.concat_ws('-', F.col('customer_id'), F.col('event_date'), F.col('session_num'))",
+          "transformation": "withColumn"
+        }
+      ]
+    },
+    {
+      "df_name": "agg_sql",
+      "type": "intermediate",
+      "columns": []
+    },
+    {
+      "df_name": "sess_agg",
+      "type": "intermediate",
+      "columns": []
+    },
+    {
+      "df_name": "out",
+      "type": "intermediate",
+      "columns": []
+    },
+    {
+      "df_name": "spark",
+      "type": "sink",
+      "columns": []
+    }
+  ],
   "assets": {
-    "reads": [],
-    "writes": []
+    "reads": [
+      {
+        "format": "parquet",
+        "path": "s3a://my-bucket/raw/web_clicks/"
+      }
+    ],
+    "writes": [
+      {
+        "format": "createOrReplaceTempView",
+        "path": "sessions",
+        "df": "df6"
+      },
+      {
+        "format": "parquet",
+        "path": "s3a://my-bucket/gold/web_sessions/",
+        "df": "parquet"
+      }
+    ]
   }
 }

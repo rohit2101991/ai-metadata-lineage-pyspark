@@ -1,8 +1,55 @@
 {
   "script_name": "script_04_dim_product_sql_cte.py",
-  "dataframes": [],
+  "dataframes": [
+    {
+      "df_name": "src",
+      "type": "source",
+      "columns": []
+    },
+    {
+      "df_name": "df",
+      "type": "intermediate",
+      "columns": []
+    },
+    {
+      "df_name": "sql",
+      "type": "intermediate",
+      "columns": []
+    },
+    {
+      "df_name": "dim_prod",
+      "type": "intermediate",
+      "columns": []
+    },
+    {
+      "df_name": "out",
+      "type": "intermediate",
+      "columns": []
+    },
+    {
+      "df_name": "spark",
+      "type": "sink",
+      "columns": []
+    }
+  ],
   "assets": {
-    "reads": [],
-    "writes": []
+    "reads": [
+      {
+        "format": "parquet",
+        "path": "s3a://my-bucket/raw/products/"
+      }
+    ],
+    "writes": [
+      {
+        "format": "createOrReplaceTempView",
+        "path": "raw_products",
+        "df": "df"
+      },
+      {
+        "format": "parquet",
+        "path": "s3a://my-bucket/silver/dim_product/",
+        "df": "parquet"
+      }
+    ]
   }
 }
