@@ -1,0 +1,8 @@
+{
+  "script_name": "script_09_sql_merge_inventory.py",
+  "dataframes": [],
+  "assets": {
+    "reads": [],
+    "writes": []
+  }
+}

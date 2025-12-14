@@ -5,28 +5,12 @@
       "df_name": "df3",
       "type": "source",
       "columns": [],
-      "assets": {
-        "reads": [
-          {
-            "format": "parquet",
-            "path": "s3a://mybucket/curated/customer_agg/"
-          }
-        ]
-      },
       "lineage": []
     },
     {
       "df_name": "dfProducts",
       "type": "intermediate",
       "columns": [],
-      "assets": {
-        "reads": [
-          {
-            "format": "parquet",
-            "path": "s3a://mybucket/ref/products.parquet"
-          }
-        ]
-      },
       "lineage": []
     },
     {
@@ -42,34 +26,12 @@
           "transformation": "join"
         }
       ],
-      "joins": [
-        {
-          "right_df": "dfProducts",
-          "join_key": [
-            "product_id"
-          ],
-          "join_type": "left"
-        }
-      ],
       "lineage": [
         {
           "target_col": "__join__dfProducts",
           "sources": [
             {
               "df": "dfJoined",
-              "col": "product_id"
-            }
-          ]
-        },
-        {
-          "target_col": "product_id",
-          "sources": [
-            {
-              "df": "dfProducts",
-              "col": "product_id"
-            },
-            {
-              "df": "dfProducts",
               "col": "product_id"
             }
           ]
@@ -81,53 +43,26 @@
       "type": "sink",
       "columns": [
         {
-          "name": "margin",
-          "derived_from": [
-            "big_amount",
-            "price"
-          ],
-          "expression": "F.col('big_amount') - F.col('price')",
+          "name": "is_profitable",
+          "derived_from": [],
+          "expression": "F.when(F.col('margin') > 0, F.lit(True)).otherwise(F.lit(False))",
           "transformation": "withColumn"
         },
         {
-          "name": "is_profitable",
-          "derived_from": [
-            "margin"
-          ],
-          "expression": "F.when(F.col('margin') > 0, F.lit(True)).otherwise(F.lit(False))",
+          "name": "margin",
+          "derived_from": [],
+          "expression": "F.col('big_amount') - F.col('price')",
           "transformation": "withColumn"
         }
       ],
-      "assets": {
-        "writes": [
-          {
-            "format": "parquet",
-            "path": "s3a://mybucket/stage/cust_products/"
-          }
-        ]
-      },
       "lineage": [
         {
-          "target_col": "margin",
-          "sources": [
-            {
-              "df": "dfStage",
-              "col": "big_amount"
-            },
-            {
-              "df": "dfStage",
-              "col": "price"
-            }
-          ]
+          "target_col": "is_profitable",
+          "sources": []
         },
         {
-          "target_col": "is_profitable",
-          "sources": [
-            {
-              "df": "dfStage",
-              "col": "margin"
-            }
-          ]
+          "target_col": "margin",
+          "sources": []
         }
       ]
     }
@@ -147,8 +82,50 @@
       {
         "format": "parquet",
         "path": "s3a://mybucket/stage/cust_products/",
-        "df": "dfStage"
+        "df": "parquet"
       }
     ]
+  },
+  "bedrock_enrichment": {
+    "group_by": [],
+    "aggregations": [],
+    "derived_columns": [
+      {
+        "df": "dfStage",
+        "col": "margin",
+        "expression": "F.col('big_amount') - F.col('price')",
+        "source_cols": [
+          "big_amount",
+          "price"
+        ]
+      },
+      {
+        "df": "dfStage",
+        "col": "is_profitable",
+        "expression": "F.when(F.col('margin') > 0, F.lit(True)).otherwise(F.lit(False))",
+        "source_cols": [
+          "margin"
+        ]
+      }
+    ],
+    "joins": [
+      {
+        "df": "dfJoined",
+        "left_df": "df3",
+        "right_df": "dfProducts",
+        "how": "left",
+        "on": [
+          "product_id"
+        ],
+        "conditions": "df3.product_id = dfProducts.product_id"
+      }
+    ],
+    "sql_blocks": []
+  },
+  "enriched_from": {
+    "script": "examples/script_b_join_products.py",
+    "base_json": "outputs/script_b_join_products.json",
+    "model_id": "amazon.nova-lite-v1:0",
+    "region": "us-east-1"
   }
 }

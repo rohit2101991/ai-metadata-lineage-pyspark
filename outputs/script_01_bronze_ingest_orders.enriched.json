@@ -1,0 +1,102 @@
+{
+  "script_name": "script_01_bronze_ingest_orders.py",
+  "dataframes": [],
+  "assets": {
+    "reads": [],
+    "writes": []
+  },
+  "bedrock_enrichment": {
+    "group_by": [],
+    "aggregations": [],
+    "derived_columns": [
+      {
+        "df": "df1",
+        "col": "order_ts",
+        "expression": "F.to_timestamp(\"order_ts\")",
+        "source_cols": [
+          "order_ts"
+        ]
+      },
+      {
+        "df": "df1",
+        "col": "order_date",
+        "expression": "F.to_date(\"order_ts\")",
+        "source_cols": [
+          "order_ts"
+        ]
+      },
+      {
+        "df": "df1",
+        "col": "customer_id",
+        "expression": "F.col(\"customer_id\").cast(\"string\")",
+        "source_cols": [
+          "customer_id"
+        ]
+      },
+      {
+        "df": "df1",
+        "col": "order_id",
+        "expression": "F.col(\"order_id\").cast(\"string\")",
+        "source_cols": [
+          "order_id"
+        ]
+      },
+      {
+        "df": "df1",
+        "col": "amount",
+        "expression": "F.coalesce(F.col(\"amount\").cast(\"double\"), F.lit(0.0))",
+        "source_cols": [
+          "amount"
+        ]
+      },
+      {
+        "df": "df1",
+        "col": "currency",
+        "expression": "F.upper(F.coalesce(F.col(\"currency\"), F.lit(\"USD\")))",
+        "source_cols": [
+          "currency"
+        ]
+      },
+      {
+        "df": "df1",
+        "col": "channel",
+        "expression": "F.lower(F.coalesce(F.col(\"channel\"), F.lit(\"unknown\")))",
+        "source_cols": [
+          "channel"
+        ]
+      },
+      {
+        "df": "df1",
+        "col": "country",
+        "expression": "F.upper(F.coalesce(F.col(\"country\"), F.lit(\"US\")))",
+        "source_cols": [
+          "country"
+        ]
+      },
+      {
+        "df": "df1",
+        "col": "is_refund",
+        "expression": "F.when(F.col(\"amount\") < 0, F.lit(1)).otherwise(F.lit(0))",
+        "source_cols": [
+          "amount"
+        ]
+      },
+      {
+        "df": "df1",
+        "col": "abs_amount",
+        "expression": "F.abs(F.col(\"amount\"))",
+        "source_cols": [
+          "amount"
+        ]
+      }
+    ],
+    "joins": [],
+    "sql_blocks": []
+  },
+  "enriched_from": {
+    "script": "examples/script_01_bronze_ingest_orders.py",
+    "base_json": "outputs/script_01_bronze_ingest_orders.json",
+    "model_id": "amazon.nova-lite-v1:0",
+    "region": "us-east-1"
+  }
+}

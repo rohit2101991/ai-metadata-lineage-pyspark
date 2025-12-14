@@ -1,0 +1,8 @@
+{
+  "script_name": "script_01_bronze_ingest_orders.py",
+  "dataframes": [],
+  "assets": {
+    "reads": [],
+    "writes": []
+  }
+}

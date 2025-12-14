@@ -1,0 +1,106 @@
+{
+  "script_name": "script_05_sales_margin_rank.py",
+  "dataframes": [],
+  "assets": {
+    "reads": [],
+    "writes": []
+  },
+  "bedrock_enrichment": {
+    "group_by": [],
+    "aggregations": [],
+    "derived_columns": [
+      {
+        "df": "df",
+        "col": "gross_sales",
+        "expression": "f.abs_amount",
+        "source_cols": [
+          "f.abs_amount"
+        ]
+      },
+      {
+        "df": "df",
+        "col": "qty",
+        "expression": "coalesce(i.qty.cast(\"int\"), lit(1))",
+        "source_cols": [
+          "i.qty"
+        ]
+      },
+      {
+        "df": "df",
+        "col": "est_cost",
+        "expression": "qty * coalesce(p.cost, lit(0.0))",
+        "source_cols": [
+          "qty",
+          "p.cost"
+        ]
+      },
+      {
+        "df": "df",
+        "col": "est_margin",
+        "expression": "gross_sales - est_cost",
+        "source_cols": [
+          "gross_sales",
+          "est_cost"
+        ]
+      },
+      {
+        "df": "df",
+        "col": "est_margin_pct",
+        "expression": "when(gross_sales == 0, lit(None)).otherwise(est_margin / gross_sales)",
+        "source_cols": [
+          "gross_sales",
+          "est_margin"
+        ]
+      },
+      {
+        "df": "df2",
+        "col": "margin_rank_day",
+        "expression": "rank().over(w)",
+        "source_cols": []
+      },
+      {
+        "df": "df2",
+        "col": "margin_dense_rank_day",
+        "expression": "dense_rank().over(w)",
+        "source_cols": []
+      },
+      {
+        "df": "df2",
+        "col": "top_10_flag",
+        "expression": "when(margin_rank_day <= 10, 1).otherwise(0)",
+        "source_cols": [
+          "margin_rank_day"
+        ]
+      }
+    ],
+    "joins": [
+      {
+        "df": "df",
+        "left_df": "f",
+        "right_df": "i",
+        "how": "inner",
+        "on": [
+          "order_id"
+        ],
+        "conditions": "f.order_id = i.order_id"
+      },
+      {
+        "df": "df",
+        "left_df": "df",
+        "right_df": "p",
+        "how": "left",
+        "on": [
+          "product_id"
+        ],
+        "conditions": "df.product_id = p.product_id"
+      }
+    ],
+    "sql_blocks": []
+  },
+  "enriched_from": {
+    "script": "examples/script_05_sales_margin_rank.py",
+    "base_json": "outputs/script_05_sales_margin_rank.json",
+    "model_id": "amazon.nova-lite-v1:0",
+    "region": "us-east-1"
+  }
+}

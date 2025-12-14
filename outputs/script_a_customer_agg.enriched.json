@@ -5,14 +5,6 @@
       "df_name": "df1",
       "type": "source",
       "columns": [],
-      "assets": {
-        "reads": [
-          {
-            "format": "parquet",
-            "path": "s3a://mybucket/landing/customer_landing.parquet"
-          }
-        ]
-      },
       "lineage": []
     },
     {
@@ -21,10 +13,7 @@
       "columns": [
         {
           "name": "big_amount",
-          "derived_from": [
-            "total_amount",
-            "total_revenue"
-          ],
+          "derived_from": [],
           "expression": "F.col('total_amount') + F.col('total_revenue')",
           "transformation": "withColumn"
         },
@@ -69,48 +58,10 @@
           "transformation": "aggregation"
         }
       ],
-      "group_by": [
-        "customer_id",
-        "product_id",
-        "event_date"
-      ],
-      "aggregations": [
-        {
-          "out_col": "total_amount",
-          "func": "sum",
-          "in_col": "amount",
-          "expression": "F.sum('amount')"
-        },
-        {
-          "out_col": "total_revenue",
-          "func": "sum",
-          "in_col": "revenue",
-          "expression": "F.sum('revenue')"
-        }
-      ],
-      "derived": [
-        {
-          "out_col": "big_amount",
-          "expression": "F.col('total_amount') + F.col('total_revenue')",
-          "derived_from": [
-            "total_amount",
-            "total_revenue"
-          ]
-        }
-      ],
       "lineage": [
         {
           "target_col": "big_amount",
-          "sources": [
-            {
-              "df": "dfAgg",
-              "col": "total_amount"
-            },
-            {
-              "df": "dfAgg",
-              "col": "total_revenue"
-            }
-          ]
+          "sources": []
         },
         {
           "target_col": "customer_id",
@@ -153,51 +104,6 @@
           "sources": [
             {
               "df": "dfAgg",
-              "col": "revenue"
-            }
-          ]
-        },
-        {
-          "target_col": "customer_id",
-          "sources": [
-            {
-              "df": "df1",
-              "col": "customer_id"
-            }
-          ]
-        },
-        {
-          "target_col": "product_id",
-          "sources": [
-            {
-              "df": "df1",
-              "col": "product_id"
-            }
-          ]
-        },
-        {
-          "target_col": "event_date",
-          "sources": [
-            {
-              "df": "df1",
-              "col": "event_date"
-            }
-          ]
-        },
-        {
-          "target_col": "total_amount",
-          "sources": [
-            {
-              "df": "df1",
-              "col": "amount"
-            }
-          ]
-        },
-        {
-          "target_col": "total_revenue",
-          "sources": [
-            {
-              "df": "df1",
               "col": "revenue"
             }
           ]
@@ -208,15 +114,6 @@
       "df_name": "dfCurated",
       "type": "sink",
       "columns": [],
-      "assets": {
-        "writes": [
-          {
-            "format": "parquet",
-            "path": "s3a://mybucket/curated/customer_agg/",
-            "df": "parquet"
-          }
-        ]
-      },
       "lineage": []
     }
   ],
@@ -234,5 +131,52 @@
         "df": "parquet"
       }
     ]
+  },
+  "bedrock_enrichment": {
+    "group_by": [
+      {
+        "df": "df1",
+        "keys": [
+          "customer_id",
+          "product_id",
+          "event_date"
+        ]
+      }
+    ],
+    "aggregations": [
+      {
+        "df": "df1",
+        "expr": "sum(amount)",
+        "source_cols": [
+          "amount"
+        ],
+        "alias": "total_amount"
+      },
+      {
+        "df": "df1",
+        "expr": "sum(revenue)",
+        "source_cols": [
+          "revenue"
+        ],
+        "alias": "total_revenue"
+      }
+    ],
+    "derived_columns": [
+      {
+        "df": "dfAgg",
+        "col": "big_amount",
+        "expression": "total_amount + total_revenue",
+        "source_cols": [
+          "total_amount",
+          "total_revenue"
+        ]
+      }
+    ]
+  },
+  "enriched_from": {
+    "script": "examples/script_a_customer_agg.py",
+    "base_json": "outputs/script_a_customer_agg.json",
+    "model_id": "amazon.nova-lite-v1:0",
+    "region": "us-east-1"
   }
 }

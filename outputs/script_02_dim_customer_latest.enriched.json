@@ -1,0 +1,56 @@
+{
+  "script_name": "script_02_dim_customer_latest.py",
+  "dataframes": [],
+  "assets": {
+    "reads": [],
+    "writes": []
+  },
+  "bedrock_enrichment": {
+    "group_by": [],
+    "aggregations": [],
+    "derived_columns": [
+      {
+        "df": "df",
+        "col": "rn",
+        "expression": "F.row_number().over(w)",
+        "source_cols": []
+      },
+      {
+        "df": "df",
+        "col": "rnk",
+        "expression": "F.rank().over(w)",
+        "source_cols": []
+      },
+      {
+        "df": "df",
+        "col": "drnk",
+        "expression": "F.dense_rank().over(w)",
+        "source_cols": []
+      },
+      {
+        "df": "df",
+        "col": "customer_tier",
+        "expression": "F.when(F.col(\"lifetime_value\") >= 10000, \"platinum\").when(F.col(\"lifetime_value\") >= 5000, \"gold\").when(F.col(\"lifetime_value\") >= 1000, \"silver\").otherwise(\"bronze\")",
+        "source_cols": [
+          "lifetime_value"
+        ]
+      },
+      {
+        "df": "df",
+        "col": "email_domain",
+        "expression": "F.lower(F.regexp_extract(F.col(\"email\"), r\"@(.+)$\", 1))",
+        "source_cols": [
+          "email"
+        ]
+      }
+    ],
+    "joins": [],
+    "sql_blocks": []
+  },
+  "enriched_from": {
+    "script": "examples/script_02_dim_customer_latest.py",
+    "base_json": "outputs/script_02_dim_customer_latest.json",
+    "model_id": "amazon.nova-lite-v1:0",
+    "region": "us-east-1"
+  }
+}

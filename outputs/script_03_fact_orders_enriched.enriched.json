@@ -1,0 +1,74 @@
+{
+  "script_name": "script_03_fact_orders_enriched.py",
+  "dataframes": [],
+  "assets": {
+    "reads": [],
+    "writes": []
+  },
+  "bedrock_enrichment": {
+    "group_by": [],
+    "aggregations": [],
+    "derived_columns": [
+      {
+        "df": "df",
+        "col": "prev_amount",
+        "expression": "lag(abs_amount, 1) OVER (PARTITION BY customer_id ORDER BY order_ts ASC)",
+        "source_cols": [
+          "abs_amount"
+        ]
+      },
+      {
+        "df": "df",
+        "col": "next_amount",
+        "expression": "lead(abs_amount, 1) OVER (PARTITION BY customer_id ORDER BY order_ts ASC)",
+        "source_cols": [
+          "abs_amount"
+        ]
+      },
+      {
+        "df": "df",
+        "col": "amount_delta_prev",
+        "expression": "abs_amount - COALESCE(prev_amount, 0.0)",
+        "source_cols": [
+          "abs_amount",
+          "prev_amount"
+        ]
+      },
+      {
+        "df": "df",
+        "col": "rolling_7_orders_sum",
+        "expression": "SUM(abs_amount) OVER (PARTITION BY customer_id ORDER BY order_ts ASC ROWS BETWEEN 7 PRECEDING AND CURRENT ROW)",
+        "source_cols": [
+          "abs_amount"
+        ]
+      },
+      {
+        "df": "df",
+        "col": "rolling_30_orders_sum",
+        "expression": "SUM(abs_amount) OVER (PARTITION BY customer_id ORDER BY order_ts ASC ROWS BETWEEN 30 PRECEDING AND CURRENT ROW)",
+        "source_cols": [
+          "abs_amount"
+        ]
+      }
+    ],
+    "joins": [
+      {
+        "df": "df",
+        "left_df": "o",
+        "right_df": "c",
+        "how": "left",
+        "on": [
+          "customer_id"
+        ],
+        "conditions": "o.customer_id = c.customer_id"
+      }
+    ],
+    "sql_blocks": []
+  },
+  "enriched_from": {
+    "script": "examples/script_03_fact_orders_enriched.py",
+    "base_json": "outputs/script_03_fact_orders_enriched.json",
+    "model_id": "amazon.nova-lite-v1:0",
+    "region": "us-east-1"
+  }
+}

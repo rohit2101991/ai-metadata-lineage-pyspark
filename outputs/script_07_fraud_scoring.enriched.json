@@ -1,0 +1,103 @@
+{
+  "script_name": "script_07_fraud_scoring.py",
+  "dataframes": [],
+  "assets": {
+    "reads": [],
+    "writes": []
+  },
+  "bedrock_enrichment": {
+    "group_by": [
+      {
+        "df": "df",
+        "keys": [
+          "order_date"
+        ]
+      }
+    ],
+    "aggregations": [],
+    "derived_columns": [
+      {
+        "df": "df",
+        "col": "high_value_flag",
+        "expression": "when(col(\"f.abs_amount\") >= 500, 1).otherwise(0)",
+        "source_cols": [
+          "f.abs_amount"
+        ]
+      },
+      {
+        "df": "df",
+        "col": "risk_from_channel",
+        "expression": "when(col(\"f.channel\").isin(\"unknown\", \"affiliate\"), 2).when(col(\"f.channel\") == \"web\", 1).otherwise(0)",
+        "source_cols": [
+          "f.channel"
+        ]
+      },
+      {
+        "df": "df",
+        "col": "risk_from_refund",
+        "expression": "when(col(\"f.is_refund\") == 1, 3).otherwise(0)",
+        "source_cols": [
+          "f.is_refund"
+        ]
+      },
+      {
+        "df": "df",
+        "col": "risk_from_sessions",
+        "expression": "when(col(\"s.events\") >= 50, 2).when(col(\"s.events\") >= 20, 1).otherwise(0)",
+        "source_cols": [
+          "s.events"
+        ]
+      },
+      {
+        "df": "df",
+        "col": "raw_risk_score",
+        "expression": "col(\"high_value_flag\") + col(\"risk_from_channel\") + col(\"risk_from_refund\") + col(\"risk_from_sessions\")",
+        "source_cols": [
+          "high_value_flag",
+          "risk_from_channel",
+          "risk_from_refund",
+          "risk_from_sessions"
+        ]
+      },
+      {
+        "df": "df2",
+        "col": "risk_rank_day",
+        "expression": "rank().over(w)",
+        "source_cols": []
+      },
+      {
+        "df": "df2",
+        "col": "risk_percent_rank_day",
+        "expression": "percent_rank().over(w)",
+        "source_cols": []
+      },
+      {
+        "df": "df2",
+        "col": "risk_bucket",
+        "expression": "when(col(\"risk_percent_rank_day\") >= 0.99, \"critical\").when(col(\"risk_percent_rank_day\") >= 0.95, \"high\").when(col(\"risk_percent_rank_day\") >= 0.80, \"medium\").otherwise(\"low\")",
+        "source_cols": [
+          "risk_percent_rank_day"
+        ]
+      }
+    ],
+    "joins": [
+      {
+        "df": "df",
+        "left_df": "f",
+        "right_df": "s",
+        "how": "left",
+        "on": [
+          "f.customer_id = s.customer_id"
+        ],
+        "conditions": "f.customer_id = s.customer_id"
+      }
+    ],
+    "sql_blocks": []
+  },
+  "enriched_from": {
+    "script": "examples/script_07_fraud_scoring.py",
+    "base_json": "outputs/script_07_fraud_scoring.json",
+    "model_id": "amazon.nova-lite-v1:0",
+    "region": "us-east-1"
+  }
+}

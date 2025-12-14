@@ -2,7 +2,7 @@ import ast
 import json
 import sys
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional
 
 # ---------- Helpers ----------
 
@@ -42,10 +42,27 @@ def _safe_unparse(node: ast.AST) -> str:
     except Exception:
         return ""
 
+def _read_text_best_effort(p: Path) -> str:
+    # Most PySpark scripts will be UTF-8; keep a safe fallback.
+    try:
+        return p.read_text(encoding="utf-8")
+    except UnicodeDecodeError:
+        return p.read_text(errors="ignore")
+
+def _iter_scripts(target: str, recursive: bool) -> List[Path]:
+    p = Path(target)
+    if p.is_file():
+        return [p] if p.suffix == ".py" else []
+    if p.is_dir():
+        globber = p.rglob("*.py") if recursive else p.glob("*.py")
+        return sorted([x for x in globber if x.is_file()])
+    return []
+
+
 # ---------- Extractors ----------
 
 def extract_lineage(script_path: str) -> Dict[str, Any]:
-    text = Path(script_path).read_text()
+    text = _read_text_best_effort(Path(script_path))
     tree = ast.parse(text)
 
     script_name = Path(script_path).name
@@ -169,13 +186,10 @@ def extract_lineage(script_path: str) -> Dict[str, Any]:
             c = node.value
             if isinstance(c.func, ast.Attribute):
                 fmt = c.func.attr  # parquet/csv/json/etc
-                # attempt to find the base object: something.write...<fmt>
                 chain = _attr_chain(c.func)
-                # example chain could be: ["dfCurated", "write", "parquet"] OR deeper
                 if c.args:
                     p = _get_str(c.args[0])
                     if p:
-                        # best-effort: infer which df is writing
                         df_writer = chain[0] if chain else ""
                         writes.append({"format": fmt, "path": p, "df": df_writer})
 
@@ -192,11 +206,53 @@ def extract_lineage(script_path: str) -> Dict[str, Any]:
         "assets": {"reads": reads, "writes": writes}
     }
 
+
+def main(argv: List[str]) -> int:
+    # Compatible with your current CLI pattern:
+    #   python extractor/static_extract.py examples/
+    # but also supports:
+    #   python extractor/static_extract.py examples/ --recursive --out outputs
+    target = "examples"
+    recursive = False
+    out_dir = Path("outputs")
+
+    args = argv[1:]
+    i = 0
+    while i < len(args):
+        a = args[i]
+        if a == "--recursive":
+            recursive = True
+        elif a == "--out":
+            if i + 1 >= len(args):
+                print("ERROR: --out requires a directory path", file=sys.stderr)
+                return 2
+            out_dir = Path(args[i + 1])
+            i += 1
+        else:
+            # first positional target
+            target = a
+        i += 1
+
+    scripts = _iter_scripts(target, recursive)
+    if not scripts:
+        print(f"No .py scripts found under: {target}", file=sys.stderr)
+        return 1
+
+    out_dir.mkdir(parents=True, exist_ok=True)
+
+    wrote = 0
+    for script_path in scripts:
+        out = extract_lineage(str(script_path))
+        out_path = out_dir / (script_path.stem + ".json")
+        out_path.write_text(json.dumps(out, indent=2), encoding="utf-8")
+        wrote += 1
+        print("Wrote", out_path)
+
+    print(f"Done. Extracted {wrote} script(s).")
+    return 0
+
+
 if __name__ == "__main__":
-    script = sys.argv[1]
-    out = extract_lineage(script)
-    out_path = Path("outputs") / (Path(script).stem + ".json")
-    out_path.write_text(json.dumps(out, indent=2))
-    print("Wrote", out_path)
+    raise SystemExit(main(sys.argv))
 
 

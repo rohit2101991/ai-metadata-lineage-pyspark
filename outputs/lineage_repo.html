@@ -25,6 +25,16 @@ small{color:#9ca3af}
 <div class="mermaid">
 flowchart LR
 
+script_01_bronze_ingest_orders_py["script_01_bronze_ingest_orders.py"]
+script_02_dim_customer_latest_py["script_02_dim_customer_latest.py"]
+script_03_fact_orders_enriched_py["script_03_fact_orders_enriched.py"]
+script_04_dim_product_sql_cte_py["script_04_dim_product_sql_cte.py"]
+script_05_sales_margin_rank_py["script_05_sales_margin_rank.py"]
+script_06_web_sessionization_py["script_06_web_sessionization.py"]
+script_07_fraud_scoring_py["script_07_fraud_scoring.py"]
+script_08_delta_merge_scd1_customer_py["script_08_delta_merge_scd1_customer.py"]
+script_09_sql_merge_inventory_py["script_09_sql_merge_inventory.py"]
+script_10_mart_customer_value_py["script_10_mart_customer_value.py"]
 script_a_customer_agg_py["script_a_customer_agg.py"]
 asset_s3a___mybucket_curated_customer_agg_["WRITE\ns3a://mybucket/curated/customer_agg/"]
 script_a_customer_agg_py --> asset_s3a___mybucket_curated_customer_agg_
@@ -42,6 +52,16 @@ script_a_customer_agg_py --> asset_s3a___mybucket_curated_customer_agg --> scrip
 </div>
 <hr/>
 <h2>2. DataFrames (expand)</h2>
+<h3>script_01_bronze_ingest_orders.py</h3>
+<h3>script_02_dim_customer_latest.py</h3>
+<h3>script_03_fact_orders_enriched.py</h3>
+<h3>script_04_dim_product_sql_cte.py</h3>
+<h3>script_05_sales_margin_rank.py</h3>
+<h3>script_06_web_sessionization.py</h3>
+<h3>script_07_fraud_scoring.py</h3>
+<h3>script_08_delta_merge_scd1_customer.py</h3>
+<h3>script_09_sql_merge_inventory.py</h3>
+<h3>script_10_mart_customer_value.py</h3>
 <h3>script_a_customer_agg.py</h3>
 <details>
 <summary>df1 (source)</summary>
@@ -57,10 +77,6 @@ flowchart TB
 DF_dfAgg["dfAgg"]
 dfAgg_col_big_amount["big_amount"]
 dfAgg_col_big_amount --> DF_dfAgg
-dfAgg_col_total_amount["dfAgg.total_amount"]
-dfAgg_col_total_amount --> dfAgg_col_big_amount
-dfAgg_col_total_revenue["dfAgg.total_revenue"]
-dfAgg_col_total_revenue --> dfAgg_col_big_amount
 dfAgg_col_customer_id["customer_id"]
 dfAgg_col_customer_id --> DF_dfAgg
 dfAgg_col_customer_id["dfAgg.customer_id"]
@@ -81,37 +97,6 @@ dfAgg_col_total_revenue["total_revenue"]
 dfAgg_col_total_revenue --> DF_dfAgg
 dfAgg_col_revenue["dfAgg.revenue"]
 dfAgg_col_revenue --> dfAgg_col_total_revenue
-dfAgg_col_customer_id["customer_id"]
-dfAgg_col_customer_id --> DF_dfAgg
-df1_col_customer_id["df1.customer_id"]
-df1_col_customer_id --> dfAgg_col_customer_id
-dfAgg_col_product_id["product_id"]
-dfAgg_col_product_id --> DF_dfAgg
-df1_col_product_id["df1.product_id"]
-df1_col_product_id --> dfAgg_col_product_id
-dfAgg_col_event_date["event_date"]
-dfAgg_col_event_date --> DF_dfAgg
-df1_col_event_date["df1.event_date"]
-df1_col_event_date --> dfAgg_col_event_date
-dfAgg_col_total_amount["total_amount"]
-dfAgg_col_total_amount --> DF_dfAgg
-df1_col_amount["df1.amount"]
-df1_col_amount --> dfAgg_col_total_amount
-dfAgg_col_total_revenue["total_revenue"]
-dfAgg_col_total_revenue --> DF_dfAgg
-df1_col_revenue["df1.revenue"]
-df1_col_revenue --> dfAgg_col_total_revenue
-dfAgg_groupby["groupBy(customer_id, product_id, event_date)"]
-dfAgg_groupby --> DF_dfAgg
-dfAgg_agg_total_amount["F.sum('amount')"]
-dfAgg_col_total_amount["total_amount"]
-dfAgg_agg_total_amount --> dfAgg_col_total_amount --> DF_dfAgg
-dfAgg_agg_total_revenue["F.sum('revenue')"]
-dfAgg_col_total_revenue["total_revenue"]
-dfAgg_agg_total_revenue --> dfAgg_col_total_revenue --> DF_dfAgg
-dfAgg_der_big_amount["big_amount = F.col('total_amount') + F.col('total_revenue')"]
-dfAgg_col_big_amount["big_amount"]
-dfAgg_der_big_amount --> dfAgg_col_big_amount --> DF_dfAgg
 </div>
 </details>
 <details>
@@ -145,14 +130,6 @@ dfJoined_col___join__dfProducts["__join__dfProducts"]
 dfJoined_col___join__dfProducts --> DF_dfJoined
 dfJoined_col_product_id["dfJoined.product_id"]
 dfJoined_col_product_id --> dfJoined_col___join__dfProducts
-dfJoined_col_product_id["product_id"]
-dfJoined_col_product_id --> DF_dfJoined
-dfProducts_col_product_id["dfProducts.product_id"]
-dfProducts_col_product_id --> dfJoined_col_product_id
-dfProducts_col_product_id["dfProducts.product_id"]
-dfProducts_col_product_id --> dfJoined_col_product_id
-dfJoined_join_dfProducts_product_id["join dfProducts on product_id (left)"]
-dfJoined_join_dfProducts_product_id --> DF_dfJoined
 </div>
 </details>
 <details>
@@ -160,16 +137,10 @@ dfJoined_join_dfProducts_product_id --> DF_dfJoined
 <div class="mermaid">
 flowchart TB
 DF_dfStage["dfStage"]
-dfStage_col_margin["margin"]
-dfStage_col_margin --> DF_dfStage
-dfStage_col_big_amount["dfStage.big_amount"]
-dfStage_col_big_amount --> dfStage_col_margin
-dfStage_col_price["dfStage.price"]
-dfStage_col_price --> dfStage_col_margin
 dfStage_col_is_profitable["is_profitable"]
 dfStage_col_is_profitable --> DF_dfStage
-dfStage_col_margin["dfStage.margin"]
-dfStage_col_margin --> dfStage_col_is_profitable
+dfStage_col_margin["margin"]
+dfStage_col_margin --> DF_dfStage
 </div>
 </details>
 </main></body></html>

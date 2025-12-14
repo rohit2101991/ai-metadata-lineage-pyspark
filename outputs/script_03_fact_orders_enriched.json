@@ -1,0 +1,8 @@
+{
+  "script_name": "script_03_fact_orders_enriched.py",
+  "dataframes": [],
+  "assets": {
+    "reads": [],
+    "writes": []
+  }
+}

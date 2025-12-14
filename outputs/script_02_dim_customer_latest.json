@@ -1,0 +1,8 @@
+{
+  "script_name": "script_02_dim_customer_latest.py",
+  "dataframes": [],
+  "assets": {
+    "reads": [],
+    "writes": []
+  }
+}

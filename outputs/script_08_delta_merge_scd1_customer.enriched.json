@@ -1,0 +1,37 @@
+{
+  "script_name": "script_08_delta_merge_scd1_customer.py",
+  "dataframes": [],
+  "assets": {
+    "reads": [],
+    "writes": []
+  },
+  "bedrock_enrichment": {
+    "group_by": [],
+    "aggregations": [],
+    "derived_columns": [],
+    "joins": [],
+    "sql_blocks": [
+      {
+        "name": "delta_merge_scd1_customer",
+        "sql": "(tgt.alias(\"t\").merge(updates.alias(\"s\"), \"t.customer_id = s.customer_id\").whenMatchedUpdate(set={\"email\": \"s.email\", \"customer_tier\": \"s.customer_tier\", \"lifetime_value\": \"s.lifetime_value\", \"updated_at\": \"s.updated_at\", \"ingested_at\": \"current_timestamp()\"}).whenNotMatchedInsert(values={\"customer_id\": \"s.customer_id\", \"email\": \"s.email\", \"customer_tier\": \"s.customer_tier\", \"lifetime_value\": \"s.lifetime_value\", \"updated_at\": \"s.updated_at\", \"ingested_at\": \"current_timestamp()\"}).execute())",
+        "tables": [
+          "dim_customer"
+        ],
+        "columns": [
+          "customer_id",
+          "email",
+          "customer_tier",
+          "lifetime_value",
+          "updated_at",
+          "ingested_at"
+        ]
+      }
+    ]
+  },
+  "enriched_from": {
+    "script": "examples/script_08_delta_merge_scd1_customer.py",
+    "base_json": "outputs/script_08_delta_merge_scd1_customer.json",
+    "model_id": "amazon.nova-lite-v1:0",
+    "region": "us-east-1"
+  }
+}

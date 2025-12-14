@@ -1,0 +1,195 @@
+{
+  "script_name": "script_10_mart_customer_value.py",
+  "dataframes": [],
+  "assets": {
+    "reads": [],
+    "writes": []
+  },
+  "bedrock_enrichment": {
+    "group_by": [
+      {
+        "df": "daily",
+        "keys": [
+          "customer_id",
+          "order_date"
+        ]
+      },
+      {
+        "df": "customer_rollup",
+        "keys": [
+          "customer_id"
+        ]
+      }
+    ],
+    "aggregations": [
+      {
+        "df": "daily",
+        "expr": "SUM(abs_amount)",
+        "source_cols": [
+          "abs_amount"
+        ],
+        "alias": "daily_spend"
+      },
+      {
+        "df": "daily",
+        "expr": "SUM(CASE WHEN is_refund = 1 THEN abs_amount ELSE 0 END)",
+        "source_cols": [
+          "is_refund",
+          "abs_amount"
+        ],
+        "alias": "daily_refund_amt"
+      },
+      {
+        "df": "daily",
+        "expr": "MAX(raw_risk_score)",
+        "source_cols": [
+          "raw_risk_score"
+        ],
+        "alias": "max_risk_score_day"
+      },
+      {
+        "df": "daily",
+        "expr": "MAX(CASE WHEN risk_bucket IN ('critical','high') THEN 1 ELSE 0 END)",
+        "source_cols": [
+          "risk_bucket"
+        ],
+        "alias": "any_high_risk_day"
+      },
+      {
+        "df": "customer_rollup",
+        "expr": "SUM(daily_spend)",
+        "source_cols": [
+          "daily_spend"
+        ],
+        "alias": "total_spend"
+      },
+      {
+        "df": "customer_rollup",
+        "expr": "SUM(daily_refund_amt)",
+        "source_cols": [
+          "daily_refund_amt"
+        ],
+        "alias": "total_refunds"
+      },
+      {
+        "df": "customer_rollup",
+        "expr": "AVG(daily_spend)",
+        "source_cols": [
+          "daily_spend"
+        ],
+        "alias": "avg_daily_spend"
+      },
+      {
+        "df": "customer_rollup",
+        "expr": "MAX(max_risk_score_day)",
+        "source_cols": [
+          "max_risk_score_day"
+        ],
+        "alias": "max_risk_score"
+      },
+      {
+        "df": "customer_rollup",
+        "expr": "MAX(any_high_risk_day)",
+        "source_cols": [
+          "any_high_risk_day"
+        ],
+        "alias": "ever_high_risk"
+      }
+    ],
+    "derived_columns": [
+      {
+        "df": "daily",
+        "col": "raw_risk_score",
+        "expression": "COALESCE(r.raw_risk_score, 0)",
+        "source_cols": [
+          "r.raw_risk_score"
+        ]
+      },
+      {
+        "df": "daily",
+        "col": "risk_bucket",
+        "expression": "COALESCE(r.risk_bucket, 'unknown')",
+        "source_cols": [
+          "r.risk_bucket"
+        ]
+      },
+      {
+        "df": "mart",
+        "col": "net_spend",
+        "expression": "(cr.total_spend - cr.total_refunds)",
+        "source_cols": [
+          "cr.total_spend",
+          "cr.total_refunds"
+        ]
+      },
+      {
+        "df": "mart",
+        "col": "customer_segment",
+        "expression": "CASE WHEN cr.total_spend >= 10000 AND cr.ever_high_risk = 0 THEN 'VIP_SAFE' WHEN cr.total_spend >= 10000 AND cr.ever_high_risk = 1 THEN 'VIP_RISK' WHEN cr.total_spend >= 2000 THEN 'HIGH_VALUE' ELSE 'STANDARD' END",
+        "source_cols": [
+          "cr.total_spend",
+          "cr.ever_high_risk"
+        ]
+      }
+    ],
+    "joins": [
+      {
+        "df": "base",
+        "left_df": "orders",
+        "right_df": "risk",
+        "how": "left",
+        "on": [
+          "o.order_id = r.order_id"
+        ],
+        "conditions": "o.order_id = r.order_id"
+      },
+      {
+        "df": "mart",
+        "left_df": "cust",
+        "right_df": "customer_rollup",
+        "how": "left",
+        "on": [
+          "c.customer_id = cr.customer_id"
+        ],
+        "conditions": "c.customer_id = cr.customer_id"
+      }
+    ],
+    "sql_blocks": [
+      {
+        "name": "mart_customer_value",
+        "sql": "WITH base AS (SELECT o.customer_id, o.order_date, o.abs_amount, o.is_refund, COALESCE(r.raw_risk_score, 0) AS raw_risk_score, COALESCE(r.risk_bucket, 'unknown') AS risk_bucket FROM orders o LEFT JOIN risk r ON o.order_id = r.order_id), daily AS (SELECT customer_id, order_date, SUM(abs_amount) AS daily_spend, SUM(CASE WHEN is_refund = 1 THEN abs_amount ELSE 0 END) AS daily_refund_amt, MAX(raw_risk_score) AS max_risk_score_day, MAX(CASE WHEN risk_bucket IN ('critical','high') THEN 1 ELSE 0 END) AS any_high_risk_day FROM base GROUP BY customer_id, order_date), customer_rollup AS (SELECT customer_id, SUM(daily_spend) AS total_spend, SUM(daily_refund_amt) AS total_refunds, AVG(daily_spend) AS avg_daily_spend, MAX(max_risk_score_day) AS max_risk_score, MAX(any_high_risk_day) AS ever_high_risk FROM daily GROUP BY customer_id) SELECT c.customer_id, c.customer_tier, cr.total_spend, cr.total_refunds, (cr.total_spend - cr.total_refunds) AS net_spend, cr.avg_daily_spend, cr.max_risk_score, cr.ever_high_risk, CASE WHEN cr.total_spend >= 10000 AND cr.ever_high_risk = 0 THEN 'VIP_SAFE' WHEN cr.total_spend >= 10000 AND cr.ever_high_risk = 1 THEN 'VIP_RISK' WHEN cr.total_spend >= 2000 THEN 'HIGH_VALUE' ELSE 'STANDARD' END AS customer_segment FROM cust c LEFT JOIN customer_rollup cr ON c.customer_id = cr.customer_id",
+        "tables": [
+          "orders",
+          "risk",
+          "cust",
+          "customer_rollup"
+        ],
+        "columns": [
+          "customer_id",
+          "order_date",
+          "abs_amount",
+          "is_refund",
+          "raw_risk_score",
+          "risk_bucket",
+          "daily_spend",
+          "daily_refund_amt",
+          "max_risk_score_day",
+          "any_high_risk_day",
+          "total_spend",
+          "total_refunds",
+          "avg_daily_spend",
+          "max_risk_score",
+          "ever_high_risk",
+          "net_spend",
+          "customer_segment"
+        ]
+      }
+    ]
+  },
+  "enriched_from": {
+    "script": "examples/script_10_mart_customer_value.py",
+    "base_json": "outputs/script_10_mart_customer_value.json",
+    "model_id": "amazon.nova-lite-v1:0",
+    "region": "us-east-1"
+  }
+}

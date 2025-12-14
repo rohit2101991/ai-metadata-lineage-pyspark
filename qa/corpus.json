@@ -1,139 +1,840 @@
 [
   {
-    "id": "script_b_join_products.py:read:s3a://mybucket/curated/customer_agg/",
-    "text": "Script script_b_join_products.py reads data from s3a://mybucket/curated/customer_agg/",
+    "id": "db1fe98d019b26fd9ce4061b9ed3b8a7b92f06f1",
+    "text": "SCRIPT: script_01_bronze_ingest_orders.py\nSOURCE_FILE: script_01_bronze_ingest_orders.enriched.json",
     "meta": {
-      "script": "script_b_join_products.py",
-      "asset": "s3a://mybucket/curated/customer_agg/"
+      "type": "script",
+      "script": "script_01_bronze_ingest_orders.py"
     }
   },
   {
-    "id": "script_b_join_products.py:read:s3a://mybucket/ref/products.parquet",
-    "text": "Script script_b_join_products.py reads data from s3a://mybucket/ref/products.parquet",
+    "id": "52929a0fd3b1b3597cc50f6a7a8a7f00db819bb8",
+    "text": "SCRIPT: script_01_bronze_ingest_orders.py\nDATAFRAME: df1\nDERIVED_COLUMN: order_ts\nEXPRESSION: F.to_timestamp(\"order_ts\")\nSOURCE_COLUMNS: ['order_ts']",
     "meta": {
-      "script": "script_b_join_products.py",
-      "asset": "s3a://mybucket/ref/products.parquet"
+      "type": "derived",
+      "script": "script_01_bronze_ingest_orders.py",
+      "df": "df1",
+      "column": "order_ts"
     }
   },
   {
-    "id": "script_b_join_products.py:dfJoined:__join__dfProducts",
-    "text": "\nScript script_b_join_products.py, dataframe dfJoined, column __join__dfProducts.\nExpression: join(dfProducts) on product_id (left).\nDerived from: ['product_id'].\n",
+    "id": "ca4d1ddd07492739e31f60db77683018e991df57",
+    "text": "SCRIPT: script_01_bronze_ingest_orders.py\nDATAFRAME: df1\nDERIVED_COLUMN: order_date\nEXPRESSION: F.to_date(\"order_ts\")\nSOURCE_COLUMNS: ['order_ts']",
     "meta": {
-      "script": "script_b_join_products.py",
-      "df": "dfJoined",
-      "column": "__join__dfProducts"
+      "type": "derived",
+      "script": "script_01_bronze_ingest_orders.py",
+      "df": "df1",
+      "column": "order_date"
     }
   },
   {
-    "id": "script_b_join_products.py:dfStage:margin",
-    "text": "\nScript script_b_join_products.py, dataframe dfStage, column margin.\nExpression: F.col('big_amount') - F.col('price').\nDerived from: ['big_amount', 'price'].\n",
+    "id": "b2efce73c15c5db77b8d62fa529b3e59569c375f",
+    "text": "SCRIPT: script_01_bronze_ingest_orders.py\nDATAFRAME: df1\nDERIVED_COLUMN: customer_id\nEXPRESSION: F.col(\"customer_id\").cast(\"string\")\nSOURCE_COLUMNS: ['customer_id']",
     "meta": {
-      "script": "script_b_join_products.py",
-      "df": "dfStage",
-      "column": "margin"
+      "type": "derived",
+      "script": "script_01_bronze_ingest_orders.py",
+      "df": "df1",
+      "column": "customer_id"
     }
   },
   {
-    "id": "script_b_join_products.py:dfStage:is_profitable",
-    "text": "\nScript script_b_join_products.py, dataframe dfStage, column is_profitable.\nExpression: F.when(F.col('margin') > 0, F.lit(True)).otherwise(F.lit(False)).\nDerived from: ['margin'].\n",
+    "id": "d530913322bc600a19c7871f4d53c6ff044c3213",
+    "text": "SCRIPT: script_01_bronze_ingest_orders.py\nDATAFRAME: df1\nDERIVED_COLUMN: order_id\nEXPRESSION: F.col(\"order_id\").cast(\"string\")\nSOURCE_COLUMNS: ['order_id']",
     "meta": {
-      "script": "script_b_join_products.py",
-      "df": "dfStage",
-      "column": "is_profitable"
+      "type": "derived",
+      "script": "script_01_bronze_ingest_orders.py",
+      "df": "df1",
+      "column": "order_id"
     }
   },
   {
-    "id": "script_b_join_products.py:write:s3a://mybucket/stage/cust_products/",
-    "text": "Script script_b_join_products.py writes data to s3a://mybucket/stage/cust_products/",
+    "id": "d34890f771274f416171cffe9a7074fa30b93fe9",
+    "text": "SCRIPT: script_01_bronze_ingest_orders.py\nDATAFRAME: df1\nDERIVED_COLUMN: amount\nEXPRESSION: F.coalesce(F.col(\"amount\").cast(\"double\"), F.lit(0.0))\nSOURCE_COLUMNS: ['amount']",
     "meta": {
-      "script": "script_b_join_products.py",
-      "asset": "s3a://mybucket/stage/cust_products/"
+      "type": "derived",
+      "script": "script_01_bronze_ingest_orders.py",
+      "df": "df1",
+      "column": "amount"
     }
   },
   {
-    "id": "script_a_customer_agg.py:read:s3a://mybucket/landing/customer_landing.parquet",
-    "text": "Script script_a_customer_agg.py reads data from s3a://mybucket/landing/customer_landing.parquet",
+    "id": "82b183000a1d31de98f68706c1b0d0da0e2da215",
+    "text": "SCRIPT: script_01_bronze_ingest_orders.py\nDATAFRAME: df1\nDERIVED_COLUMN: currency\nEXPRESSION: F.upper(F.coalesce(F.col(\"currency\"), F.lit(\"USD\")))\nSOURCE_COLUMNS: ['currency']",
     "meta": {
-      "script": "script_a_customer_agg.py",
-      "asset": "s3a://mybucket/landing/customer_landing.parquet"
+      "type": "derived",
+      "script": "script_01_bronze_ingest_orders.py",
+      "df": "df1",
+      "column": "currency"
     }
   },
   {
-    "id": "script_a_customer_agg.py:dfAgg:big_amount",
-    "text": "\nScript script_a_customer_agg.py, dataframe dfAgg, column big_amount.\nExpression: F.col('total_amount') + F.col('total_revenue').\nDerived from: ['total_amount', 'total_revenue'].\n",
+    "id": "21e4700c26c8b4d135e217dcfdc4528cff8d97c5",
+    "text": "SCRIPT: script_01_bronze_ingest_orders.py\nDATAFRAME: df1\nDERIVED_COLUMN: channel\nEXPRESSION: F.lower(F.coalesce(F.col(\"channel\"), F.lit(\"unknown\")))\nSOURCE_COLUMNS: ['channel']",
     "meta": {
+      "type": "derived",
+      "script": "script_01_bronze_ingest_orders.py",
+      "df": "df1",
+      "column": "channel"
+    }
+  },
+  {
+    "id": "dcf5b3e17da615bb2f3cb92d2f01e39935075aa2",
+    "text": "SCRIPT: script_01_bronze_ingest_orders.py\nDATAFRAME: df1\nDERIVED_COLUMN: country\nEXPRESSION: F.upper(F.coalesce(F.col(\"country\"), F.lit(\"US\")))\nSOURCE_COLUMNS: ['country']",
+    "meta": {
+      "type": "derived",
+      "script": "script_01_bronze_ingest_orders.py",
+      "df": "df1",
+      "column": "country"
+    }
+  },
+  {
+    "id": "c5e68a363d3ebb2cd020d0d0b43fe95a0c44a77f",
+    "text": "SCRIPT: script_01_bronze_ingest_orders.py\nDATAFRAME: df1\nDERIVED_COLUMN: is_refund\nEXPRESSION: F.when(F.col(\"amount\") < 0, F.lit(1)).otherwise(F.lit(0))\nSOURCE_COLUMNS: ['amount']",
+    "meta": {
+      "type": "derived",
+      "script": "script_01_bronze_ingest_orders.py",
+      "df": "df1",
+      "column": "is_refund"
+    }
+  },
+  {
+    "id": "5e4f769273feb892ce0016e44e2a5f5c6013b050",
+    "text": "SCRIPT: script_01_bronze_ingest_orders.py\nDATAFRAME: df1\nDERIVED_COLUMN: abs_amount\nEXPRESSION: F.abs(F.col(\"amount\"))\nSOURCE_COLUMNS: ['amount']",
+    "meta": {
+      "type": "derived",
+      "script": "script_01_bronze_ingest_orders.py",
+      "df": "df1",
+      "column": "abs_amount"
+    }
+  },
+  {
+    "id": "e0cc6b72b8577b391b523045dfdb7887ba760286",
+    "text": "SCRIPT: script_02_dim_customer_latest.py\nSOURCE_FILE: script_02_dim_customer_latest.enriched.json",
+    "meta": {
+      "type": "script",
+      "script": "script_02_dim_customer_latest.py"
+    }
+  },
+  {
+    "id": "3dd6957f308b62dcd74c448ad350b7d55b2e2db7",
+    "text": "SCRIPT: script_02_dim_customer_latest.py\nDATAFRAME: df\nDERIVED_COLUMN: rn\nEXPRESSION: F.row_number().over(w)\nSOURCE_COLUMNS: []",
+    "meta": {
+      "type": "derived",
+      "script": "script_02_dim_customer_latest.py",
+      "df": "df",
+      "column": "rn"
+    }
+  },
+  {
+    "id": "1d5a9564f8526ee4de8f9a06f1cd7f597346c570",
+    "text": "SCRIPT: script_02_dim_customer_latest.py\nDATAFRAME: df\nDERIVED_COLUMN: rnk\nEXPRESSION: F.rank().over(w)\nSOURCE_COLUMNS: []",
+    "meta": {
+      "type": "derived",
+      "script": "script_02_dim_customer_latest.py",
+      "df": "df",
+      "column": "rnk"
+    }
+  },
+  {
+    "id": "01652d73728bc05b8a36cdb8481f44e4ae5268bc",
+    "text": "SCRIPT: script_02_dim_customer_latest.py\nDATAFRAME: df\nDERIVED_COLUMN: drnk\nEXPRESSION: F.dense_rank().over(w)\nSOURCE_COLUMNS: []",
+    "meta": {
+      "type": "derived",
+      "script": "script_02_dim_customer_latest.py",
+      "df": "df",
+      "column": "drnk"
+    }
+  },
+  {
+    "id": "65d47048d3f66bd5ed097e2b0e130efbc9783a98",
+    "text": "SCRIPT: script_02_dim_customer_latest.py\nDATAFRAME: df\nDERIVED_COLUMN: customer_tier\nEXPRESSION: F.when(F.col(\"lifetime_value\") >= 10000, \"platinum\").when(F.col(\"lifetime_value\") >= 5000, \"gold\").when(F.col(\"lifetime_value\") >= 1000, \"silver\").otherwise(\"bronze\")\nSOURCE_COLUMNS: ['lifetime_value']",
+    "meta": {
+      "type": "derived",
+      "script": "script_02_dim_customer_latest.py",
+      "df": "df",
+      "column": "customer_tier"
+    }
+  },
+  {
+    "id": "b8c21ef75e9c988b4adee9260c77b3cdc3e1403e",
+    "text": "SCRIPT: script_02_dim_customer_latest.py\nDATAFRAME: df\nDERIVED_COLUMN: email_domain\nEXPRESSION: F.lower(F.regexp_extract(F.col(\"email\"), r\"@(.+)$\", 1))\nSOURCE_COLUMNS: ['email']",
+    "meta": {
+      "type": "derived",
+      "script": "script_02_dim_customer_latest.py",
+      "df": "df",
+      "column": "email_domain"
+    }
+  },
+  {
+    "id": "a2c47c2a287342c0c2ef29ff60837c9564b4c7e7",
+    "text": "SCRIPT: script_03_fact_orders_enriched.py\nSOURCE_FILE: script_03_fact_orders_enriched.enriched.json",
+    "meta": {
+      "type": "script",
+      "script": "script_03_fact_orders_enriched.py"
+    }
+  },
+  {
+    "id": "952e24a9f959e5e7b2ed4768a116a2b68060f8a2",
+    "text": "SCRIPT: script_03_fact_orders_enriched.py\nDATAFRAME: df\nDERIVED_COLUMN: prev_amount\nEXPRESSION: lag(abs_amount, 1) OVER (PARTITION BY customer_id ORDER BY order_ts ASC)\nSOURCE_COLUMNS: ['abs_amount']",
+    "meta": {
+      "type": "derived",
+      "script": "script_03_fact_orders_enriched.py",
+      "df": "df",
+      "column": "prev_amount"
+    }
+  },
+  {
+    "id": "26311357b38bd02c419a7d72b4c7730618bba00a",
+    "text": "SCRIPT: script_03_fact_orders_enriched.py\nDATAFRAME: df\nDERIVED_COLUMN: next_amount\nEXPRESSION: lead(abs_amount, 1) OVER (PARTITION BY customer_id ORDER BY order_ts ASC)\nSOURCE_COLUMNS: ['abs_amount']",
+    "meta": {
+      "type": "derived",
+      "script": "script_03_fact_orders_enriched.py",
+      "df": "df",
+      "column": "next_amount"
+    }
+  },
+  {
+    "id": "7757947b0e0e39dbc7eff689d40f215b0695cf5e",
+    "text": "SCRIPT: script_03_fact_orders_enriched.py\nDATAFRAME: df\nDERIVED_COLUMN: amount_delta_prev\nEXPRESSION: abs_amount - COALESCE(prev_amount, 0.0)\nSOURCE_COLUMNS: ['abs_amount', 'prev_amount']",
+    "meta": {
+      "type": "derived",
+      "script": "script_03_fact_orders_enriched.py",
+      "df": "df",
+      "column": "amount_delta_prev"
+    }
+  },
+  {
+    "id": "fe80ae8e1fc156e8fa4218cfa8e0c41255124fd5",
+    "text": "SCRIPT: script_03_fact_orders_enriched.py\nDATAFRAME: df\nDERIVED_COLUMN: rolling_7_orders_sum\nEXPRESSION: SUM(abs_amount) OVER (PARTITION BY customer_id ORDER BY order_ts ASC ROWS BETWEEN 7 PRECEDING AND CURRENT ROW)\nSOURCE_COLUMNS: ['abs_amount']",
+    "meta": {
+      "type": "derived",
+      "script": "script_03_fact_orders_enriched.py",
+      "df": "df",
+      "column": "rolling_7_orders_sum"
+    }
+  },
+  {
+    "id": "ae35dacb8844434d01ab6db0f141b9e149fad900",
+    "text": "SCRIPT: script_03_fact_orders_enriched.py\nDATAFRAME: df\nDERIVED_COLUMN: rolling_30_orders_sum\nEXPRESSION: SUM(abs_amount) OVER (PARTITION BY customer_id ORDER BY order_ts ASC ROWS BETWEEN 30 PRECEDING AND CURRENT ROW)\nSOURCE_COLUMNS: ['abs_amount']",
+    "meta": {
+      "type": "derived",
+      "script": "script_03_fact_orders_enriched.py",
+      "df": "df",
+      "column": "rolling_30_orders_sum"
+    }
+  },
+  {
+    "id": "8442811b461524903a91827f606312e359560f9a",
+    "text": "SCRIPT: script_03_fact_orders_enriched.py\nRESULT_DF: df\nJOIN: o left JOIN c\nON: ['customer_id']",
+    "meta": {
+      "type": "join",
+      "script": "script_03_fact_orders_enriched.py",
+      "df": "df"
+    }
+  },
+  {
+    "id": "21f2be61688a7175ff03a155c6e2bc57c7024dda",
+    "text": "SCRIPT: script_04_dim_product_sql_cte.py\nSOURCE_FILE: script_04_dim_product_sql_cte.enriched.json",
+    "meta": {
+      "type": "script",
+      "script": "script_04_dim_product_sql_cte.py"
+    }
+  },
+  {
+    "id": "c6f77b995b461aff1beb8ca550d900878f61b8ee",
+    "text": "SCRIPT: script_05_sales_margin_rank.py\nSOURCE_FILE: script_05_sales_margin_rank.enriched.json",
+    "meta": {
+      "type": "script",
+      "script": "script_05_sales_margin_rank.py"
+    }
+  },
+  {
+    "id": "f99def555e9997fa4450dd75d9e48b911167ea3a",
+    "text": "SCRIPT: script_05_sales_margin_rank.py\nDATAFRAME: df\nDERIVED_COLUMN: gross_sales\nEXPRESSION: f.abs_amount\nSOURCE_COLUMNS: ['f.abs_amount']",
+    "meta": {
+      "type": "derived",
+      "script": "script_05_sales_margin_rank.py",
+      "df": "df",
+      "column": "gross_sales"
+    }
+  },
+  {
+    "id": "81203df9534f322df86aa15841d77a597aaa325e",
+    "text": "SCRIPT: script_05_sales_margin_rank.py\nDATAFRAME: df\nDERIVED_COLUMN: qty\nEXPRESSION: coalesce(i.qty.cast(\"int\"), lit(1))\nSOURCE_COLUMNS: ['i.qty']",
+    "meta": {
+      "type": "derived",
+      "script": "script_05_sales_margin_rank.py",
+      "df": "df",
+      "column": "qty"
+    }
+  },
+  {
+    "id": "b4dd1078a2cea9191e0f323a7ca88813ae8764b5",
+    "text": "SCRIPT: script_05_sales_margin_rank.py\nDATAFRAME: df\nDERIVED_COLUMN: est_cost\nEXPRESSION: qty * coalesce(p.cost, lit(0.0))\nSOURCE_COLUMNS: ['qty', 'p.cost']",
+    "meta": {
+      "type": "derived",
+      "script": "script_05_sales_margin_rank.py",
+      "df": "df",
+      "column": "est_cost"
+    }
+  },
+  {
+    "id": "8c7cc7159cee20d555c2ee40c45adfb0d92bebb0",
+    "text": "SCRIPT: script_05_sales_margin_rank.py\nDATAFRAME: df\nDERIVED_COLUMN: est_margin\nEXPRESSION: gross_sales - est_cost\nSOURCE_COLUMNS: ['gross_sales', 'est_cost']",
+    "meta": {
+      "type": "derived",
+      "script": "script_05_sales_margin_rank.py",
+      "df": "df",
+      "column": "est_margin"
+    }
+  },
+  {
+    "id": "ac52223ce1db2f96bcef4365586fc245fae07f55",
+    "text": "SCRIPT: script_05_sales_margin_rank.py\nDATAFRAME: df\nDERIVED_COLUMN: est_margin_pct\nEXPRESSION: when(gross_sales == 0, lit(None)).otherwise(est_margin / gross_sales)\nSOURCE_COLUMNS: ['gross_sales', 'est_margin']",
+    "meta": {
+      "type": "derived",
+      "script": "script_05_sales_margin_rank.py",
+      "df": "df",
+      "column": "est_margin_pct"
+    }
+  },
+  {
+    "id": "aa5b0c31d2abbec761122612609ed20cff0dc14b",
+    "text": "SCRIPT: script_05_sales_margin_rank.py\nDATAFRAME: df2\nDERIVED_COLUMN: margin_rank_day\nEXPRESSION: rank().over(w)\nSOURCE_COLUMNS: []",
+    "meta": {
+      "type": "derived",
+      "script": "script_05_sales_margin_rank.py",
+      "df": "df2",
+      "column": "margin_rank_day"
+    }
+  },
+  {
+    "id": "9f8253b71bbb5b4f1759871fe44930a057e7c2d7",
+    "text": "SCRIPT: script_05_sales_margin_rank.py\nDATAFRAME: df2\nDERIVED_COLUMN: margin_dense_rank_day\nEXPRESSION: dense_rank().over(w)\nSOURCE_COLUMNS: []",
+    "meta": {
+      "type": "derived",
+      "script": "script_05_sales_margin_rank.py",
+      "df": "df2",
+      "column": "margin_dense_rank_day"
+    }
+  },
+  {
+    "id": "8fc74b294ae5eeaec4708b371ff88839954d73ca",
+    "text": "SCRIPT: script_05_sales_margin_rank.py\nDATAFRAME: df2\nDERIVED_COLUMN: top_10_flag\nEXPRESSION: when(margin_rank_day <= 10, 1).otherwise(0)\nSOURCE_COLUMNS: ['margin_rank_day']",
+    "meta": {
+      "type": "derived",
+      "script": "script_05_sales_margin_rank.py",
+      "df": "df2",
+      "column": "top_10_flag"
+    }
+  },
+  {
+    "id": "99899d1a9a4f218db60da5416a58ea635b4c24e9",
+    "text": "SCRIPT: script_05_sales_margin_rank.py\nRESULT_DF: df\nJOIN: f inner JOIN i\nON: ['order_id']",
+    "meta": {
+      "type": "join",
+      "script": "script_05_sales_margin_rank.py",
+      "df": "df"
+    }
+  },
+  {
+    "id": "e2a345e2f7488e68581b0f0e8d2093c0dca5d5ac",
+    "text": "SCRIPT: script_05_sales_margin_rank.py\nRESULT_DF: df\nJOIN: df left JOIN p\nON: ['product_id']",
+    "meta": {
+      "type": "join",
+      "script": "script_05_sales_margin_rank.py",
+      "df": "df"
+    }
+  },
+  {
+    "id": "df7ca758da4aac619c24503c47d37e661b59cb0b",
+    "text": "SCRIPT: script_06_web_sessionization.py\nSOURCE_FILE: script_06_web_sessionization.enriched.json",
+    "meta": {
+      "type": "script",
+      "script": "script_06_web_sessionization.py"
+    }
+  },
+  {
+    "id": "93bd901485e52b48b59c56419fd8d432c61db23f",
+    "text": "SCRIPT: script_06_web_sessionization.py\nDATAFRAME: clicks\nDERIVED_COLUMN: event_ts\nEXPRESSION: to_timestamp(event_ts)\nSOURCE_COLUMNS: ['event_ts']",
+    "meta": {
+      "type": "derived",
+      "script": "script_06_web_sessionization.py",
+      "df": "clicks",
+      "column": "event_ts"
+    }
+  },
+  {
+    "id": "d7e2626702893d991bafcd767aa76121dac83dfc",
+    "text": "SCRIPT: script_06_web_sessionization.py\nDATAFRAME: clicks\nDERIVED_COLUMN: event_date\nEXPRESSION: to_date(event_ts)\nSOURCE_COLUMNS: ['event_ts']",
+    "meta": {
+      "type": "derived",
+      "script": "script_06_web_sessionization.py",
+      "df": "clicks",
+      "column": "event_date"
+    }
+  },
+  {
+    "id": "023619bf7a3a2f330357667b0eb27a9d35108890",
+    "text": "SCRIPT: script_06_web_sessionization.py\nDATAFRAME: clicks\nDERIVED_COLUMN: url_host\nEXPRESSION: regexp_extract(url, 'https?://([^/]+)/', 1)\nSOURCE_COLUMNS: ['url']",
+    "meta": {
+      "type": "derived",
+      "script": "script_06_web_sessionization.py",
+      "df": "clicks",
+      "column": "url_host"
+    }
+  },
+  {
+    "id": "b03d26e1e445e92d5e53899ccd7ff9693913b6db",
+    "text": "SCRIPT: script_06_web_sessionization.py\nDATAFRAME: clicks\nDERIVED_COLUMN: ref_host\nEXPRESSION: regexp_extract(referrer, 'https?://([^/]+)/', 1)\nSOURCE_COLUMNS: ['referrer']",
+    "meta": {
+      "type": "derived",
+      "script": "script_06_web_sessionization.py",
+      "df": "clicks",
+      "column": "ref_host"
+    }
+  },
+  {
+    "id": "0f0ea1bb0dd17a126ce8344db5a2859be6b06423",
+    "text": "SCRIPT: script_06_web_sessionization.py\nDATAFRAME: df2\nDERIVED_COLUMN: prev_ts\nEXPRESSION: lag(event_ts).over(w)\nSOURCE_COLUMNS: ['event_ts']",
+    "meta": {
+      "type": "derived",
+      "script": "script_06_web_sessionization.py",
+      "df": "df2",
+      "column": "prev_ts"
+    }
+  },
+  {
+    "id": "fea172c0aceb1ba19dd7ee715d7ab8a38b535494",
+    "text": "SCRIPT: script_06_web_sessionization.py\nDATAFRAME: df3\nDERIVED_COLUMN: gap_min\nEXPRESSION: (col(event_ts).cast('long') - col(prev_ts).cast('long')) / 60.0\nSOURCE_COLUMNS: ['event_ts', 'prev_ts']",
+    "meta": {
+      "type": "derived",
+      "script": "script_06_web_sessionization.py",
+      "df": "df3",
+      "column": "gap_min"
+    }
+  },
+  {
+    "id": "116254e6b18feb6df84c708e916b42678849319d",
+    "text": "SCRIPT: script_06_web_sessionization.py\nDATAFRAME: df4\nDERIVED_COLUMN: new_session_flag\nEXPRESSION: when((col(gap_min).isNull()) | (col(gap_min) > 30), 1).otherwise(0)\nSOURCE_COLUMNS: ['gap_min']",
+    "meta": {
+      "type": "derived",
+      "script": "script_06_web_sessionization.py",
+      "df": "df4",
+      "column": "new_session_flag"
+    }
+  },
+  {
+    "id": "f9aba64bff403f79072b281c8c752382e9be6b8a",
+    "text": "SCRIPT: script_06_web_sessionization.py\nDATAFRAME: df5\nDERIVED_COLUMN: session_num\nEXPRESSION: sum(new_session_flag).over(w)\nSOURCE_COLUMNS: ['new_session_flag']",
+    "meta": {
+      "type": "derived",
+      "script": "script_06_web_sessionization.py",
+      "df": "df5",
+      "column": "session_num"
+    }
+  },
+  {
+    "id": "97f159ef240448a11c5d194886ada2d4b264670c",
+    "text": "SCRIPT: script_06_web_sessionization.py\nDATAFRAME: df6\nDERIVED_COLUMN: session_id\nEXPRESSION: concat_ws('-', col(customer_id), col(event_date), col(session_num))\nSOURCE_COLUMNS: ['customer_id', 'event_date', 'session_num']",
+    "meta": {
+      "type": "derived",
+      "script": "script_06_web_sessionization.py",
+      "df": "df6",
+      "column": "session_id"
+    }
+  },
+  {
+    "id": "cb69bdfdedc25fb687f6504eda5ddd2e8918c051",
+    "text": "SCRIPT: script_06_web_sessionization.py\nDATAFRAME: sessions\nAGGREGATION: MIN(event_ts) AS session_start_ts\nSOURCE_COLUMNS: ['event_ts']",
+    "meta": {
+      "type": "aggregation",
+      "script": "script_06_web_sessionization.py",
+      "df": "sessions",
+      "column": "session_start_ts"
+    }
+  },
+  {
+    "id": "ea93aae527644447df4e835489c8453092193737",
+    "text": "SCRIPT: script_06_web_sessionization.py\nDATAFRAME: sessions\nAGGREGATION: MAX(event_ts) AS session_end_ts\nSOURCE_COLUMNS: ['event_ts']",
+    "meta": {
+      "type": "aggregation",
+      "script": "script_06_web_sessionization.py",
+      "df": "sessions",
+      "column": "session_end_ts"
+    }
+  },
+  {
+    "id": "3c17fb649a3b142285cdaf0cec8805cc17ae39b9",
+    "text": "SCRIPT: script_06_web_sessionization.py\nDATAFRAME: sessions\nAGGREGATION: COUNT(1) AS events\nSOURCE_COLUMNS: ['*']",
+    "meta": {
+      "type": "aggregation",
+      "script": "script_06_web_sessionization.py",
+      "df": "sessions",
+      "column": "events"
+    }
+  },
+  {
+    "id": "0282ca977245294e0f681e319b2bb5b54f6e2208",
+    "text": "SCRIPT: script_06_web_sessionization.py\nDATAFRAME: sessions\nAGGREGATION: COUNT(DISTINCT url_host) AS unique_hosts\nSOURCE_COLUMNS: ['url_host']",
+    "meta": {
+      "type": "aggregation",
+      "script": "script_06_web_sessionization.py",
+      "df": "sessions",
+      "column": "unique_hosts"
+    }
+  },
+  {
+    "id": "a9a2a6168272fb9e64523779c0c354616e358283",
+    "text": "SCRIPT: script_07_fraud_scoring.py\nSOURCE_FILE: script_07_fraud_scoring.enriched.json",
+    "meta": {
+      "type": "script",
+      "script": "script_07_fraud_scoring.py"
+    }
+  },
+  {
+    "id": "ec9f4ce6939a2e857f55c2873ebd32035a3ce5df",
+    "text": "SCRIPT: script_07_fraud_scoring.py\nDATAFRAME: df\nDERIVED_COLUMN: high_value_flag\nEXPRESSION: when(col(\"f.abs_amount\") >= 500, 1).otherwise(0)\nSOURCE_COLUMNS: ['f.abs_amount']",
+    "meta": {
+      "type": "derived",
+      "script": "script_07_fraud_scoring.py",
+      "df": "df",
+      "column": "high_value_flag"
+    }
+  },
+  {
+    "id": "9e88ffab974fcb57f2a3d5271753b8f2712f1a27",
+    "text": "SCRIPT: script_07_fraud_scoring.py\nDATAFRAME: df\nDERIVED_COLUMN: risk_from_channel\nEXPRESSION: when(col(\"f.channel\").isin(\"unknown\", \"affiliate\"), 2).when(col(\"f.channel\") == \"web\", 1).otherwise(0)\nSOURCE_COLUMNS: ['f.channel']",
+    "meta": {
+      "type": "derived",
+      "script": "script_07_fraud_scoring.py",
+      "df": "df",
+      "column": "risk_from_channel"
+    }
+  },
+  {
+    "id": "7529799179932586c4d7634cd162a1c2b9995958",
+    "text": "SCRIPT: script_07_fraud_scoring.py\nDATAFRAME: df\nDERIVED_COLUMN: risk_from_refund\nEXPRESSION: when(col(\"f.is_refund\") == 1, 3).otherwise(0)\nSOURCE_COLUMNS: ['f.is_refund']",
+    "meta": {
+      "type": "derived",
+      "script": "script_07_fraud_scoring.py",
+      "df": "df",
+      "column": "risk_from_refund"
+    }
+  },
+  {
+    "id": "57493b9199c45542174312bc55ce4b2390461ef5",
+    "text": "SCRIPT: script_07_fraud_scoring.py\nDATAFRAME: df\nDERIVED_COLUMN: risk_from_sessions\nEXPRESSION: when(col(\"s.events\") >= 50, 2).when(col(\"s.events\") >= 20, 1).otherwise(0)\nSOURCE_COLUMNS: ['s.events']",
+    "meta": {
+      "type": "derived",
+      "script": "script_07_fraud_scoring.py",
+      "df": "df",
+      "column": "risk_from_sessions"
+    }
+  },
+  {
+    "id": "ac6acb2a30e9ca02b0d92b7c6c3025dc5effb71b",
+    "text": "SCRIPT: script_07_fraud_scoring.py\nDATAFRAME: df\nDERIVED_COLUMN: raw_risk_score\nEXPRESSION: col(\"high_value_flag\") + col(\"risk_from_channel\") + col(\"risk_from_refund\") + col(\"risk_from_sessions\")\nSOURCE_COLUMNS: ['high_value_flag', 'risk_from_channel', 'risk_from_refund', 'risk_from_sessions']",
+    "meta": {
+      "type": "derived",
+      "script": "script_07_fraud_scoring.py",
+      "df": "df",
+      "column": "raw_risk_score"
+    }
+  },
+  {
+    "id": "5ba8c97a236002034804ccbb8e7364f851caba26",
+    "text": "SCRIPT: script_07_fraud_scoring.py\nDATAFRAME: df2\nDERIVED_COLUMN: risk_rank_day\nEXPRESSION: rank().over(w)\nSOURCE_COLUMNS: []",
+    "meta": {
+      "type": "derived",
+      "script": "script_07_fraud_scoring.py",
+      "df": "df2",
+      "column": "risk_rank_day"
+    }
+  },
+  {
+    "id": "582b03f4259f2652e2d88b5a3e41b47cd57d8cdc",
+    "text": "SCRIPT: script_07_fraud_scoring.py\nDATAFRAME: df2\nDERIVED_COLUMN: risk_percent_rank_day\nEXPRESSION: percent_rank().over(w)\nSOURCE_COLUMNS: []",
+    "meta": {
+      "type": "derived",
+      "script": "script_07_fraud_scoring.py",
+      "df": "df2",
+      "column": "risk_percent_rank_day"
+    }
+  },
+  {
+    "id": "92cdd7f3888f1882dddfbb8b49d474f9ccf56e13",
+    "text": "SCRIPT: script_07_fraud_scoring.py\nDATAFRAME: df2\nDERIVED_COLUMN: risk_bucket\nEXPRESSION: when(col(\"risk_percent_rank_day\") >= 0.99, \"critical\").when(col(\"risk_percent_rank_day\") >= 0.95, \"high\").when(col(\"risk_percent_rank_day\") >= 0.80, \"medium\").otherwise(\"low\")\nSOURCE_COLUMNS: ['risk_percent_rank_day']",
+    "meta": {
+      "type": "derived",
+      "script": "script_07_fraud_scoring.py",
+      "df": "df2",
+      "column": "risk_bucket"
+    }
+  },
+  {
+    "id": "fb14610f2f4674f4d0c7fb9959ce9f3c1e45c4dc",
+    "text": "SCRIPT: script_07_fraud_scoring.py\nRESULT_DF: df\nJOIN: f left JOIN s\nON: ['f.customer_id = s.customer_id']",
+    "meta": {
+      "type": "join",
+      "script": "script_07_fraud_scoring.py",
+      "df": "df"
+    }
+  },
+  {
+    "id": "4d45c0c5e44133ad0dfc77e69b2e301ccbc1ca2e",
+    "text": "SCRIPT: script_08_delta_merge_scd1_customer.py\nSOURCE_FILE: script_08_delta_merge_scd1_customer.enriched.json",
+    "meta": {
+      "type": "script",
+      "script": "script_08_delta_merge_scd1_customer.py"
+    }
+  },
+  {
+    "id": "de7cf102808c7ff2fc0a4fd76fa46afe55d36864",
+    "text": "SCRIPT: script_09_sql_merge_inventory.py\nSOURCE_FILE: script_09_sql_merge_inventory.enriched.json",
+    "meta": {
+      "type": "script",
+      "script": "script_09_sql_merge_inventory.py"
+    }
+  },
+  {
+    "id": "d0e7f9667247fd7d10009b821d1156bfe18e1a74",
+    "text": "SCRIPT: script_09_sql_merge_inventory.py\nRESULT_DF: delta_inventory\nJOIN: t merge JOIN inv_updates\nON: ['sku', 'warehouse']",
+    "meta": {
+      "type": "join",
+      "script": "script_09_sql_merge_inventory.py",
+      "df": "delta_inventory"
+    }
+  },
+  {
+    "id": "affbc935f3ddd51bae6ff67fad2111f923259985",
+    "text": "SCRIPT: script_10_mart_customer_value.py\nSOURCE_FILE: script_10_mart_customer_value.enriched.json",
+    "meta": {
+      "type": "script",
+      "script": "script_10_mart_customer_value.py"
+    }
+  },
+  {
+    "id": "12d2debabfc08c173966f74f39dc760927273e93",
+    "text": "SCRIPT: script_10_mart_customer_value.py\nDATAFRAME: daily\nDERIVED_COLUMN: raw_risk_score\nEXPRESSION: COALESCE(r.raw_risk_score, 0)\nSOURCE_COLUMNS: ['r.raw_risk_score']",
+    "meta": {
+      "type": "derived",
+      "script": "script_10_mart_customer_value.py",
+      "df": "daily",
+      "column": "raw_risk_score"
+    }
+  },
+  {
+    "id": "1e47d7df55dd3b227d07e802753918bded662cab",
+    "text": "SCRIPT: script_10_mart_customer_value.py\nDATAFRAME: daily\nDERIVED_COLUMN: risk_bucket\nEXPRESSION: COALESCE(r.risk_bucket, 'unknown')\nSOURCE_COLUMNS: ['r.risk_bucket']",
+    "meta": {
+      "type": "derived",
+      "script": "script_10_mart_customer_value.py",
+      "df": "daily",
+      "column": "risk_bucket"
+    }
+  },
+  {
+    "id": "205eac80fa2a152a19b87874d2e2b3c37d9c9920",
+    "text": "SCRIPT: script_10_mart_customer_value.py\nDATAFRAME: mart\nDERIVED_COLUMN: net_spend\nEXPRESSION: (cr.total_spend - cr.total_refunds)\nSOURCE_COLUMNS: ['cr.total_spend', 'cr.total_refunds']",
+    "meta": {
+      "type": "derived",
+      "script": "script_10_mart_customer_value.py",
+      "df": "mart",
+      "column": "net_spend"
+    }
+  },
+  {
+    "id": "b4daeb92785ce703a570eb936af7cf82d31c699a",
+    "text": "SCRIPT: script_10_mart_customer_value.py\nDATAFRAME: mart\nDERIVED_COLUMN: customer_segment\nEXPRESSION: CASE WHEN cr.total_spend >= 10000 AND cr.ever_high_risk = 0 THEN 'VIP_SAFE' WHEN cr.total_spend >= 10000 AND cr.ever_high_risk = 1 THEN 'VIP_RISK' WHEN cr.total_spend >= 2000 THEN 'HIGH_VALUE' ELSE 'STANDARD' END\nSOURCE_COLUMNS: ['cr.total_spend', 'cr.ever_high_risk']",
+    "meta": {
+      "type": "derived",
+      "script": "script_10_mart_customer_value.py",
+      "df": "mart",
+      "column": "customer_segment"
+    }
+  },
+  {
+    "id": "15bec3a2e0d104bd6f18614e6ef79d5caf442df4",
+    "text": "SCRIPT: script_10_mart_customer_value.py\nDATAFRAME: daily\nAGGREGATION: SUM(abs_amount) AS daily_spend\nSOURCE_COLUMNS: ['abs_amount']",
+    "meta": {
+      "type": "aggregation",
+      "script": "script_10_mart_customer_value.py",
+      "df": "daily",
+      "column": "daily_spend"
+    }
+  },
+  {
+    "id": "39ce5b6aec917acdf0dbb7cab3a84837a8f3c135",
+    "text": "SCRIPT: script_10_mart_customer_value.py\nDATAFRAME: daily\nAGGREGATION: SUM(CASE WHEN is_refund = 1 THEN abs_amount ELSE 0 END) AS daily_refund_amt\nSOURCE_COLUMNS: ['is_refund', 'abs_amount']",
+    "meta": {
+      "type": "aggregation",
+      "script": "script_10_mart_customer_value.py",
+      "df": "daily",
+      "column": "daily_refund_amt"
+    }
+  },
+  {
+    "id": "1f988c13fcfc6b55d8d9d6071912985f2b87d22f",
+    "text": "SCRIPT: script_10_mart_customer_value.py\nDATAFRAME: daily\nAGGREGATION: MAX(raw_risk_score) AS max_risk_score_day\nSOURCE_COLUMNS: ['raw_risk_score']",
+    "meta": {
+      "type": "aggregation",
+      "script": "script_10_mart_customer_value.py",
+      "df": "daily",
+      "column": "max_risk_score_day"
+    }
+  },
+  {
+    "id": "0335a4cadc085420d5bdc9efd41b0716fd233383",
+    "text": "SCRIPT: script_10_mart_customer_value.py\nDATAFRAME: daily\nAGGREGATION: MAX(CASE WHEN risk_bucket IN ('critical','high') THEN 1 ELSE 0 END) AS any_high_risk_day\nSOURCE_COLUMNS: ['risk_bucket']",
+    "meta": {
+      "type": "aggregation",
+      "script": "script_10_mart_customer_value.py",
+      "df": "daily",
+      "column": "any_high_risk_day"
+    }
+  },
+  {
+    "id": "300537b8697b72ea6120a6b12cce50e5923eed7c",
+    "text": "SCRIPT: script_10_mart_customer_value.py\nDATAFRAME: customer_rollup\nAGGREGATION: SUM(daily_spend) AS total_spend\nSOURCE_COLUMNS: ['daily_spend']",
+    "meta": {
+      "type": "aggregation",
+      "script": "script_10_mart_customer_value.py",
+      "df": "customer_rollup",
+      "column": "total_spend"
+    }
+  },
+  {
+    "id": "20baf7c76877f0cd99ca8652a94311d44c368c6c",
+    "text": "SCRIPT: script_10_mart_customer_value.py\nDATAFRAME: customer_rollup\nAGGREGATION: SUM(daily_refund_amt) AS total_refunds\nSOURCE_COLUMNS: ['daily_refund_amt']",
+    "meta": {
+      "type": "aggregation",
+      "script": "script_10_mart_customer_value.py",
+      "df": "customer_rollup",
+      "column": "total_refunds"
+    }
+  },
+  {
+    "id": "e7cef5f30ff60234e9101ca6b68e33c2141b4caa",
+    "text": "SCRIPT: script_10_mart_customer_value.py\nDATAFRAME: customer_rollup\nAGGREGATION: AVG(daily_spend) AS avg_daily_spend\nSOURCE_COLUMNS: ['daily_spend']",
+    "meta": {
+      "type": "aggregation",
+      "script": "script_10_mart_customer_value.py",
+      "df": "customer_rollup",
+      "column": "avg_daily_spend"
+    }
+  },
+  {
+    "id": "7d0d5327b8b4d63e0aec368dc8d0eca523e4a175",
+    "text": "SCRIPT: script_10_mart_customer_value.py\nDATAFRAME: customer_rollup\nAGGREGATION: MAX(max_risk_score_day) AS max_risk_score\nSOURCE_COLUMNS: ['max_risk_score_day']",
+    "meta": {
+      "type": "aggregation",
+      "script": "script_10_mart_customer_value.py",
+      "df": "customer_rollup",
+      "column": "max_risk_score"
+    }
+  },
+  {
+    "id": "a0d49fbe8255baf0fe27c0a030d06a40a9da12d4",
+    "text": "SCRIPT: script_10_mart_customer_value.py\nDATAFRAME: customer_rollup\nAGGREGATION: MAX(any_high_risk_day) AS ever_high_risk\nSOURCE_COLUMNS: ['any_high_risk_day']",
+    "meta": {
+      "type": "aggregation",
+      "script": "script_10_mart_customer_value.py",
+      "df": "customer_rollup",
+      "column": "ever_high_risk"
+    }
+  },
+  {
+    "id": "80ec211475c786cf55af5924f6a200e3bd452a7e",
+    "text": "SCRIPT: script_10_mart_customer_value.py\nRESULT_DF: base\nJOIN: orders left JOIN risk\nON: ['o.order_id = r.order_id']",
+    "meta": {
+      "type": "join",
+      "script": "script_10_mart_customer_value.py",
+      "df": "base"
+    }
+  },
+  {
+    "id": "80e575034e8e7529f5a0a602d17dc5ad6234d51c",
+    "text": "SCRIPT: script_10_mart_customer_value.py\nRESULT_DF: mart\nJOIN: cust left JOIN customer_rollup\nON: ['c.customer_id = cr.customer_id']",
+    "meta": {
+      "type": "join",
+      "script": "script_10_mart_customer_value.py",
+      "df": "mart"
+    }
+  },
+  {
+    "id": "6f26efc0c27f1bcfa145142b7f31b20319bb5ad2",
+    "text": "SCRIPT: script_a_customer_agg.py\nSOURCE_FILE: script_a_customer_agg.enriched.json\nREADS:\n- parquet s3a://mybucket/landing/customer_landing.parquet\nWRITES:\n- df=parquet -> parquet s3a://mybucket/curated/customer_agg/\nDATAFRAMES:\n- df1\n- dfAgg\n- dfCurated",
+    "meta": {
+      "type": "script",
+      "script": "script_a_customer_agg.py"
+    }
+  },
+  {
+    "id": "63044f1d408effd459e21165f8afc72a94a7463d",
+    "text": "SCRIPT: script_a_customer_agg.py\nDATAFRAME: dfAgg\nDERIVED_COLUMN: big_amount\nEXPRESSION: total_amount + total_revenue\nSOURCE_COLUMNS: ['total_amount', 'total_revenue']",
+    "meta": {
+      "type": "derived",
       "script": "script_a_customer_agg.py",
       "df": "dfAgg",
       "column": "big_amount"
     }
   },
   {
-    "id": "script_a_customer_agg.py:dfAgg:customer_id",
-    "text": "\nScript script_a_customer_agg.py, dataframe dfAgg, column customer_id.\nExpression: .\nDerived from: ['customer_id'].\n",
+    "id": "a481be74b1768f9ca41379639a7f21871e272e04",
+    "text": "SCRIPT: script_a_customer_agg.py\nDATAFRAME: df1\nAGGREGATION: sum(amount) AS total_amount\nSOURCE_COLUMNS: ['amount']",
     "meta": {
+      "type": "aggregation",
       "script": "script_a_customer_agg.py",
-      "df": "dfAgg",
-      "column": "customer_id"
-    }
-  },
-  {
-    "id": "script_a_customer_agg.py:dfAgg:product_id",
-    "text": "\nScript script_a_customer_agg.py, dataframe dfAgg, column product_id.\nExpression: .\nDerived from: ['product_id'].\n",
-    "meta": {
-      "script": "script_a_customer_agg.py",
-      "df": "dfAgg",
-      "column": "product_id"
-    }
-  },
-  {
-    "id": "script_a_customer_agg.py:dfAgg:event_date",
-    "text": "\nScript script_a_customer_agg.py, dataframe dfAgg, column event_date.\nExpression: .\nDerived from: ['event_date'].\n",
-    "meta": {
-      "script": "script_a_customer_agg.py",
-      "df": "dfAgg",
-      "column": "event_date"
-    }
-  },
-  {
-    "id": "script_a_customer_agg.py:dfAgg:total_amount",
-    "text": "\nScript script_a_customer_agg.py, dataframe dfAgg, column total_amount.\nExpression: F.sum('amount').\nDerived from: ['amount'].\n",
-    "meta": {
-      "script": "script_a_customer_agg.py",
-      "df": "dfAgg",
+      "df": "df1",
       "column": "total_amount"
     }
   },
   {
-    "id": "script_a_customer_agg.py:dfAgg:total_revenue",
-    "text": "\nScript script_a_customer_agg.py, dataframe dfAgg, column total_revenue.\nExpression: F.sum('revenue').\nDerived from: ['revenue'].\n",
+    "id": "11f7c701d81713fb76c9a4a69d30e5bf1db1625a",
+    "text": "SCRIPT: script_a_customer_agg.py\nDATAFRAME: df1\nAGGREGATION: sum(revenue) AS total_revenue\nSOURCE_COLUMNS: ['revenue']",
     "meta": {
+      "type": "aggregation",
       "script": "script_a_customer_agg.py",
-      "df": "dfAgg",
+      "df": "df1",
       "column": "total_revenue"
     }
   },
   {
-    "id": "script_a_customer_agg.py:dfAgg:agg:total_amount",
-    "text": "\nScript script_a_customer_agg.py aggregates amount using sum\nto produce total_amount in dataframe dfAgg.\n",
+    "id": "45f1f21d01ab810b24e3a56d863605b025bf461a",
+    "text": "SCRIPT: script_b_join_products.py\nSOURCE_FILE: script_b_join_products.enriched.json\nREADS:\n- parquet s3a://mybucket/curated/customer_agg/\n- parquet s3a://mybucket/ref/products.parquet\nWRITES:\n- df=parquet -> parquet s3a://mybucket/stage/cust_products/\nDATAFRAMES:\n- df3\n- dfJoined\n- dfProducts\n- dfStage",
     "meta": {
-      "script": "script_a_customer_agg.py",
-      "df": "dfAgg"
+      "type": "script",
+      "script": "script_b_join_products.py"
     }
   },
   {
-    "id": "script_a_customer_agg.py:dfAgg:agg:total_revenue",
-    "text": "\nScript script_a_customer_agg.py aggregates revenue using sum\nto produce total_revenue in dataframe dfAgg.\n",
+    "id": "e44a2a3c42888b34a2a93c850549a97663e47472",
+    "text": "SCRIPT: script_b_join_products.py\nDATAFRAME: dfStage\nDERIVED_COLUMN: margin\nEXPRESSION: F.col('big_amount') - F.col('price')\nSOURCE_COLUMNS: ['big_amount', 'price']",
     "meta": {
-      "script": "script_a_customer_agg.py",
-      "df": "dfAgg"
+      "type": "derived",
+      "script": "script_b_join_products.py",
+      "df": "dfStage",
+      "column": "margin"
     }
   },
   {
-    "id": "script_a_customer_agg.py:write:s3a://mybucket/curated/customer_agg/",
-    "text": "Script script_a_customer_agg.py writes data to s3a://mybucket/curated/customer_agg/",
+    "id": "f377826477579305d1c0b550dfea199340c314aa",
+    "text": "SCRIPT: script_b_join_products.py\nDATAFRAME: dfStage\nDERIVED_COLUMN: is_profitable\nEXPRESSION: F.when(F.col('margin') > 0, F.lit(True)).otherwise(F.lit(False))\nSOURCE_COLUMNS: ['margin']",
     "meta": {
-      "script": "script_a_customer_agg.py",
-      "asset": "s3a://mybucket/curated/customer_agg/"
+      "type": "derived",
+      "script": "script_b_join_products.py",
+      "df": "dfStage",
+      "column": "is_profitable"
+    }
+  },
+  {
+    "id": "c122cf1f9a6dab6abad4a99c99c47633acb340c6",
+    "text": "SCRIPT: script_b_join_products.py\nRESULT_DF: dfJoined\nJOIN: df3 left JOIN dfProducts\nON: ['product_id']",
+    "meta": {
+      "type": "join",
+      "script": "script_b_join_products.py",
+      "df": "dfJoined"
     }
   }
 ]
