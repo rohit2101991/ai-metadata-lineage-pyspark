@@ -111,11 +111,21 @@
     "derived_columns": [
       {
         "df": "df2",
-        "col": "email_domain",
-        "expression": "F.lower(F.regexp_extract(F.col('email'), '@(.+)$', 1))",
-        "source_cols": [
-          "email"
-        ]
+        "col": "rn",
+        "expression": "F.row_number().over(w)",
+        "source_cols": []
+      },
+      {
+        "df": "df2",
+        "col": "rnk",
+        "expression": "F.rank().over(w)",
+        "source_cols": []
+      },
+      {
+        "df": "df2",
+        "col": "drnk",
+        "expression": "F.dense_rank().over(w)",
+        "source_cols": []
       },
       {
         "df": "df2",
@@ -127,21 +137,11 @@
       },
       {
         "df": "df2",
-        "col": "drnk",
-        "expression": "F.dense_rank().over(w)",
-        "source_cols": []
-      },
-      {
-        "df": "df2",
-        "col": "rnk",
-        "expression": "F.rank().over(w)",
-        "source_cols": []
-      },
-      {
-        "df": "df2",
-        "col": "rn",
-        "expression": "F.row_number().over(w)",
-        "source_cols": []
+        "col": "email_domain",
+        "expression": "F.lower(F.regexp_extract(F.col('email'), '@(.+)$', 1))",
+        "source_cols": [
+          "email"
+        ]
       }
     ],
     "joins": [],
@@ -150,7 +150,7 @@
   "enriched_from": {
     "script": "examples/script_02_dim_customer_latest.py",
     "base_json": "outputs/script_02_dim_customer_latest.json",
-    "model_id": "amazon.nova-lite-v1:0",
+    "model_id": "amazon.nova-pro-v1:0",
     "region": "us-east-1"
   }
 }

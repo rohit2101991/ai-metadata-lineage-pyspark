@@ -135,7 +135,7 @@
   "bedrock_enrichment": {
     "group_by": [
       {
-        "df": "df1",
+        "df": "dfAgg",
         "keys": [
           "customer_id",
           "product_id",
@@ -145,7 +145,7 @@
     ],
     "aggregations": [
       {
-        "df": "df1",
+        "df": "dfAgg",
         "expr": "sum(amount)",
         "source_cols": [
           "amount"
@@ -153,7 +153,7 @@
         "alias": "total_amount"
       },
       {
-        "df": "df1",
+        "df": "dfAgg",
         "expr": "sum(revenue)",
         "source_cols": [
           "revenue"
@@ -171,12 +171,14 @@
           "total_revenue"
         ]
       }
-    ]
+    ],
+    "joins": [],
+    "sql_blocks": []
   },
   "enriched_from": {
     "script": "examples/script_a_customer_agg.py",
     "base_json": "outputs/script_a_customer_agg.json",
-    "model_id": "amazon.nova-lite-v1:0",
+    "model_id": "amazon.nova-pro-v1:0",
     "region": "us-east-1"
   }
 }

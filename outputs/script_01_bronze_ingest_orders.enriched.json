@@ -240,7 +240,7 @@
   "enriched_from": {
     "script": "examples/script_01_bronze_ingest_orders.py",
     "base_json": "outputs/script_01_bronze_ingest_orders.json",
-    "model_id": "amazon.nova-lite-v1:0",
+    "model_id": "amazon.nova-pro-v1:0",
     "region": "us-east-1"
   }
 }

@@ -44,26 +44,22 @@
   "bedrock_enrichment": {
     "group_by": [],
     "aggregations": [],
-    "derived_columns": [],
-    "joins": [
+    "derived_columns": [
       {
-        "df": "t",
-        "left_df": "t",
-        "right_df": "s",
-        "how": "inner",
-        "on": [
-          "customer_id"
-        ],
-        "conditions": "t.customer_id = s.customer_id"
+        "df": "updates",
+        "col": "ingested_at",
+        "expression": "current_timestamp()",
+        "source_cols": []
       }
     ],
+    "joins": [],
     "sql_blocks": [
       {
-        "name": "delta_merge_scd1_customer",
-        "sql": "MERGE INTO tgt AS t USING updates AS s ON t.customer_id = s.customer_id WHEN MATCHED THEN UPDATE SET email = s.email, customer_tier = s.customer_tier, lifetime_value = s.lifetime_value, updated_at = s.updated_at, ingested_at = current_timestamp() WHEN NOT MATCHED THEN INSERT (customer_id, email, customer_tier, lifetime_value, updated_at, ingested_at) VALUES (s.customer_id, s.email, s.customer_tier, s.lifetime_value, s.updated_at, current_timestamp())",
+        "name": "merge_delta_table",
+        "sql": "MERGE INTO t USING s ON t.customer_id = s.customer_id WHEN MATCHED THEN UPDATE SET email = s.email, customer_tier = s.customer_tier, lifetime_value = s.lifetime_value, updated_at = s.updated_at, ingested_at = current_timestamp() WHEN NOT MATCHED THEN INSERT (customer_id, email, customer_tier, lifetime_value, updated_at, ingested_at) VALUES (s.customer_id, s.email, s.customer_tier, s.lifetime_value, s.updated_at, current_timestamp())",
         "tables": [
-          "tgt",
-          "updates"
+          "t",
+          "s"
         ],
         "columns": [
           "customer_id",
@@ -79,7 +75,7 @@
   "enriched_from": {
     "script": "examples/script_08_delta_merge_scd1_customer.py",
     "base_json": "outputs/script_08_delta_merge_scd1_customer.json",
-    "model_id": "amazon.nova-lite-v1:0",
+    "model_id": "amazon.nova-pro-v1:0",
     "region": "us-east-1"
   }
 }

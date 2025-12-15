@@ -61,11 +61,86 @@
   "bedrock_enrichment": {
     "group_by": [],
     "aggregations": [],
-    "derived_columns": [],
+    "derived_columns": [
+      {
+        "df": "sql",
+        "col": "product_id",
+        "expression": "CAST(product_id AS STRING)",
+        "source_cols": [
+          "product_id"
+        ]
+      },
+      {
+        "df": "sql",
+        "col": "category",
+        "expression": "LOWER(TRIM(category))",
+        "source_cols": [
+          "category"
+        ]
+      },
+      {
+        "df": "sql",
+        "col": "price",
+        "expression": "CAST(price AS DOUBLE)",
+        "source_cols": [
+          "price"
+        ]
+      },
+      {
+        "df": "sql",
+        "col": "cost",
+        "expression": "CAST(cost AS DOUBLE)",
+        "source_cols": [
+          "cost"
+        ]
+      },
+      {
+        "df": "sql",
+        "col": "currency",
+        "expression": "UPPER(COALESCE(currency, 'USD'))",
+        "source_cols": [
+          "currency"
+        ]
+      },
+      {
+        "df": "sql",
+        "col": "updated_date",
+        "expression": "TO_DATE(updated_at)",
+        "source_cols": [
+          "updated_at"
+        ]
+      },
+      {
+        "df": "sql",
+        "col": "price_norm",
+        "expression": "CASE WHEN price IS NULL OR price <= 0 THEN 0 ELSE price END",
+        "source_cols": [
+          "price"
+        ]
+      },
+      {
+        "df": "sql",
+        "col": "unit_margin",
+        "expression": "(price_norm - cost)",
+        "source_cols": [
+          "price_norm",
+          "cost"
+        ]
+      },
+      {
+        "df": "sql",
+        "col": "margin_pct",
+        "expression": "CASE WHEN price_norm = 0 THEN NULL ELSE (price_norm - cost)/price_norm END",
+        "source_cols": [
+          "price_norm",
+          "cost"
+        ]
+      }
+    ],
     "joins": [],
     "sql_blocks": [
       {
-        "name": "dim_product_sql_cte",
+        "name": "sql",
         "sql": "WITH cleaned AS (SELECT CAST(product_id AS STRING) AS product_id, LOWER(TRIM(category)) AS category, CAST(price AS DOUBLE) AS price, CAST(cost AS DOUBLE) AS cost, UPPER(COALESCE(currency, 'USD')) AS currency, TO_DATE(updated_at) AS updated_date, CASE WHEN price IS NULL OR price <= 0 THEN 0 ELSE price END AS price_norm FROM raw_products), metrics AS (SELECT product_id, category, currency, updated_date, price_norm, cost, (price_norm - cost) AS unit_margin, CASE WHEN price_norm = 0 THEN NULL ELSE (price_norm - cost)/price_norm END AS margin_pct FROM cleaned) SELECT * FROM metrics",
         "tables": [
           "raw_products"
@@ -73,10 +148,11 @@
         "columns": [
           "product_id",
           "category",
-          "currency",
-          "updated_date",
-          "price_norm",
+          "price",
           "cost",
+          "currency",
+          "updated_at",
+          "price_norm",
           "unit_margin",
           "margin_pct"
         ]
@@ -86,7 +162,7 @@
   "enriched_from": {
     "script": "examples/script_04_dim_product_sql_cte.py",
     "base_json": "outputs/script_04_dim_product_sql_cte.json",
-    "model_id": "amazon.nova-lite-v1:0",
+    "model_id": "amazon.nova-pro-v1:0",
     "region": "us-east-1"
   }
 }

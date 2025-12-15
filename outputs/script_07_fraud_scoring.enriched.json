@@ -228,11 +228,11 @@
     "joins": [
       {
         "df": "df",
-        "left_df": "f",
-        "right_df": "s",
+        "left_df": "fact",
+        "right_df": "sessions",
         "how": "left",
         "on": [
-          "f.customer_id = s.customer_id"
+          "customer_id"
         ],
         "conditions": "f.customer_id = s.customer_id"
       }
@@ -242,7 +242,7 @@
   "enriched_from": {
     "script": "examples/script_07_fraud_scoring.py",
     "base_json": "outputs/script_07_fraud_scoring.json",
-    "model_id": "amazon.nova-lite-v1:0",
+    "model_id": "amazon.nova-pro-v1:0",
     "region": "us-east-1"
   }
 }

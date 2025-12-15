@@ -4,7 +4,8 @@
     {
       "df_name": "clicks",
       "type": "source",
-      "columns": []
+      "columns": [],
+      "lineage": []
     },
     {
       "df_name": "df",
@@ -34,12 +35,31 @@
           "expression": "F.to_timestamp('event_ts')",
           "transformation": "withColumn"
         }
+      ],
+      "lineage": [
+        {
+          "target_col": "ref_host",
+          "sources": []
+        },
+        {
+          "target_col": "url_host",
+          "sources": []
+        },
+        {
+          "target_col": "event_date",
+          "sources": []
+        },
+        {
+          "target_col": "event_ts",
+          "sources": []
+        }
       ]
     },
     {
       "df_name": "w",
       "type": "intermediate",
-      "columns": []
+      "columns": [],
+      "lineage": []
     },
     {
       "df_name": "df2",
@@ -50,6 +70,12 @@
           "derived_from": [],
           "expression": "F.lag('event_ts').over(w)",
           "transformation": "withColumn"
+        }
+      ],
+      "lineage": [
+        {
+          "target_col": "prev_ts",
+          "sources": []
         }
       ]
     },
@@ -63,6 +89,12 @@
           "expression": "(F.col('event_ts').cast('long') - F.col('prev_ts').cast('long')) / 60.0",
           "transformation": "withColumn"
         }
+      ],
+      "lineage": [
+        {
+          "target_col": "gap_min",
+          "sources": []
+        }
       ]
     },
     {
@@ -74,6 +106,12 @@
           "derived_from": [],
           "expression": "F.when(F.col('gap_min').isNull() | (F.col('gap_min') > 30), 1).otherwise(0)",
           "transformation": "withColumn"
+        }
+      ],
+      "lineage": [
+        {
+          "target_col": "new_session_flag",
+          "sources": []
         }
       ]
     },
@@ -87,6 +125,12 @@
           "expression": "F.sum('new_session_flag').over(w)",
           "transformation": "withColumn"
         }
+      ],
+      "lineage": [
+        {
+          "target_col": "session_num",
+          "sources": []
+        }
       ]
     },
     {
@@ -99,27 +143,37 @@
           "expression": "F.concat_ws('-', F.col('customer_id'), F.col('event_date'), F.col('session_num'))",
           "transformation": "withColumn"
         }
+      ],
+      "lineage": [
+        {
+          "target_col": "session_id",
+          "sources": []
+        }
       ]
     },
     {
       "df_name": "agg_sql",
       "type": "intermediate",
-      "columns": []
+      "columns": [],
+      "lineage": []
     },
     {
       "df_name": "sess_agg",
       "type": "intermediate",
-      "columns": []
+      "columns": [],
+      "lineage": []
     },
     {
       "df_name": "out",
       "type": "intermediate",
-      "columns": []
+      "columns": [],
+      "lineage": []
     },
     {
       "df_name": "spark",
       "type": "sink",
-      "columns": []
+      "columns": [],
+      "lineage": []
     }
   ],
   "assets": {
@@ -145,7 +199,7 @@
   "bedrock_enrichment": {
     "group_by": [
       {
-        "df": "sessions",
+        "df": "sess_agg",
         "keys": [
           "customer_id",
           "session_id"
@@ -154,7 +208,7 @@
     ],
     "aggregations": [
       {
-        "df": "sessions",
+        "df": "sess_agg",
         "expr": "MIN(event_ts)",
         "source_cols": [
           "event_ts"
@@ -162,7 +216,7 @@
         "alias": "session_start_ts"
       },
       {
-        "df": "sessions",
+        "df": "sess_agg",
         "expr": "MAX(event_ts)",
         "source_cols": [
           "event_ts"
@@ -170,15 +224,13 @@
         "alias": "session_end_ts"
       },
       {
-        "df": "sessions",
+        "df": "sess_agg",
         "expr": "COUNT(1)",
-        "source_cols": [
-          "*"
-        ],
+        "source_cols": [],
         "alias": "events"
       },
       {
-        "df": "sessions",
+        "df": "sess_agg",
         "expr": "COUNT(DISTINCT url_host)",
         "source_cols": [
           "url_host"
@@ -189,18 +241,10 @@
     "derived_columns": [
       {
         "df": "df",
-        "col": "ref_host",
-        "expression": "F.regexp_extract(F.col('referrer'), 'https?://([^/]+)/', 1)",
+        "col": "event_ts",
+        "expression": "F.to_timestamp('event_ts')",
         "source_cols": [
-          "referrer"
-        ]
-      },
-      {
-        "df": "df",
-        "col": "url_host",
-        "expression": "F.regexp_extract(F.col('url'), 'https?://([^/]+)/', 1)",
-        "source_cols": [
-          "url"
+          "event_ts"
         ]
       },
       {
@@ -213,10 +257,18 @@
       },
       {
         "df": "df",
-        "col": "event_ts",
-        "expression": "F.to_timestamp('event_ts')",
+        "col": "url_host",
+        "expression": "F.regexp_extract(F.col('url'), 'https?://([^/]+)/', 1)",
         "source_cols": [
-          "event_ts"
+          "url"
+        ]
+      },
+      {
+        "df": "df",
+        "col": "ref_host",
+        "expression": "F.regexp_extract(F.col('referrer'), 'https?://([^/]+)/', 1)",
+        "source_cols": [
+          "referrer"
         ]
       },
       {
@@ -263,6 +315,7 @@
         ]
       }
     ],
+    "joins": [],
     "sql_blocks": [
       {
         "name": "agg_sql",
@@ -273,10 +326,8 @@
         "columns": [
           "customer_id",
           "session_id",
-          "session_start_ts",
-          "session_end_ts",
-          "events",
-          "unique_hosts"
+          "event_ts",
+          "url_host"
         ]
       }
     ]
@@ -284,7 +335,7 @@
   "enriched_from": {
     "script": "examples/script_06_web_sessionization.py",
     "base_json": "outputs/script_06_web_sessionization.json",
-    "model_id": "amazon.nova-lite-v1:0",
+    "model_id": "amazon.nova-pro-v1:0",
     "region": "us-east-1"
   }
 }

@@ -129,7 +129,24 @@
   },
   "bedrock_enrichment": {
     "group_by": [],
-    "aggregations": [],
+    "aggregations": [
+      {
+        "df": "df2",
+        "expr": "F.sum('abs_amount').over(w.rowsBetween(-6, 0))",
+        "source_cols": [
+          "abs_amount"
+        ],
+        "alias": "rolling_7_orders_sum"
+      },
+      {
+        "df": "df2",
+        "expr": "F.sum('abs_amount').over(w.rowsBetween(-29, 0))",
+        "source_cols": [
+          "abs_amount"
+        ],
+        "alias": "rolling_30_orders_sum"
+      }
+    ],
     "derived_columns": [
       {
         "df": "df2",
@@ -155,22 +172,6 @@
           "abs_amount",
           "prev_amount"
         ]
-      },
-      {
-        "df": "df2",
-        "col": "rolling_7_orders_sum",
-        "expression": "F.sum('abs_amount').over(w.rowsBetween(-6, 0))",
-        "source_cols": [
-          "abs_amount"
-        ]
-      },
-      {
-        "df": "df2",
-        "col": "rolling_30_orders_sum",
-        "expression": "F.sum('abs_amount').over(w.rowsBetween(-29, 0))",
-        "source_cols": [
-          "abs_amount"
-        ]
       }
     ],
     "joins": [
@@ -182,7 +183,7 @@
         "on": [
           "customer_id"
         ],
-        "conditions": "F.col(\"o.customer_id\") = F.col(\"c.customer_id\")"
+        "conditions": "o.customer_id = c.customer_id"
       }
     ],
     "sql_blocks": []
@@ -190,7 +191,7 @@
   "enriched_from": {
     "script": "examples/script_03_fact_orders_enriched.py",
     "base_json": "outputs/script_03_fact_orders_enriched.json",
-    "model_id": "amazon.nova-lite-v1:0",
+    "model_id": "amazon.nova-pro-v1:0",
     "region": "us-east-1"
   }
 }

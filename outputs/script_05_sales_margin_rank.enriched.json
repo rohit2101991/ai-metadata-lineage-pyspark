@@ -181,31 +181,44 @@
         "df": "df",
         "col": "gross_sales",
         "expression": "F.col('f.abs_amount')",
-        "source_cols": []
+        "source_cols": [
+          "f.abs_amount"
+        ]
       },
       {
         "df": "df",
         "col": "qty",
         "expression": "F.coalesce(F.col('qty').cast('int'), F.lit(1))",
-        "source_cols": []
+        "source_cols": [
+          "qty"
+        ]
       },
       {
         "df": "df",
         "col": "est_cost",
         "expression": "F.col('qty') * F.coalesce(F.col('p.cost'), F.lit(0.0))",
-        "source_cols": []
+        "source_cols": [
+          "qty",
+          "p.cost"
+        ]
       },
       {
         "df": "df",
         "col": "est_margin",
         "expression": "F.col('gross_sales') - F.col('est_cost')",
-        "source_cols": []
+        "source_cols": [
+          "gross_sales",
+          "est_cost"
+        ]
       },
       {
         "df": "df",
         "col": "est_margin_pct",
         "expression": "F.when(F.col('gross_sales') == 0, F.lit(None)).otherwise(F.col('est_margin') / F.col('gross_sales'))",
-        "source_cols": []
+        "source_cols": [
+          "gross_sales",
+          "est_margin"
+        ]
       },
       {
         "df": "df2",
@@ -223,29 +236,31 @@
         "df": "df2",
         "col": "top_10_flag",
         "expression": "F.when(F.col('margin_rank_day') <= 10, 1).otherwise(0)",
-        "source_cols": []
+        "source_cols": [
+          "margin_rank_day"
+        ]
       }
     ],
     "joins": [
       {
         "df": "df",
-        "left_df": "f",
-        "right_df": "i",
+        "left_df": "fact",
+        "right_df": "line_items",
         "how": "inner",
         "on": [
           "order_id"
         ],
-        "conditions": "f.order_id = i.order_id"
+        "conditions": "order_id"
       },
       {
         "df": "df",
         "left_df": "df",
-        "right_df": "p",
+        "right_df": "dim_prod",
         "how": "left",
         "on": [
           "product_id"
         ],
-        "conditions": "df.product_id = p.product_id"
+        "conditions": "product_id"
       }
     ],
     "sql_blocks": []
@@ -253,7 +268,7 @@
   "enriched_from": {
     "script": "examples/script_05_sales_margin_rank.py",
     "base_json": "outputs/script_05_sales_margin_rank.json",
-    "model_id": "amazon.nova-lite-v1:0",
+    "model_id": "amazon.nova-pro-v1:0",
     "region": "us-east-1"
   }
 }

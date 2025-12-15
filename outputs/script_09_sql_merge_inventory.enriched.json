@@ -59,15 +59,19 @@
         "df": "inv",
         "col": "updated_at",
         "expression": "F.to_timestamp('updated_at')",
-        "source_cols": []
+        "source_cols": [
+          "updated_at"
+        ]
       }
     ],
     "joins": [],
     "sql_blocks": [
       {
-        "name": "delta_inventory_creation",
+        "name": "create_delta_inventory",
         "sql": "CREATE TABLE IF NOT EXISTS delta_inventory USING delta LOCATION's3a://my-bucket/delta/inventory/'",
-        "tables": [],
+        "tables": [
+          "delta_inventory"
+        ],
         "columns": []
       },
       {
@@ -89,7 +93,7 @@
   "enriched_from": {
     "script": "examples/script_09_sql_merge_inventory.py",
     "base_json": "outputs/script_09_sql_merge_inventory.json",
-    "model_id": "amazon.nova-lite-v1:0",
+    "model_id": "amazon.nova-pro-v1:0",
     "region": "us-east-1"
   }
 }
