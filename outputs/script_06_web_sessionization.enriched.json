@@ -4,8 +4,7 @@
     {
       "df_name": "clicks",
       "type": "source",
-      "columns": [],
-      "lineage": []
+      "columns": []
     },
     {
       "df_name": "df",
@@ -35,31 +34,12 @@
           "expression": "F.to_timestamp('event_ts')",
           "transformation": "withColumn"
         }
-      ],
-      "lineage": [
-        {
-          "target_col": "ref_host",
-          "sources": []
-        },
-        {
-          "target_col": "url_host",
-          "sources": []
-        },
-        {
-          "target_col": "event_date",
-          "sources": []
-        },
-        {
-          "target_col": "event_ts",
-          "sources": []
-        }
       ]
     },
     {
       "df_name": "w",
       "type": "intermediate",
-      "columns": [],
-      "lineage": []
+      "columns": []
     },
     {
       "df_name": "df2",
@@ -70,12 +50,6 @@
           "derived_from": [],
           "expression": "F.lag('event_ts').over(w)",
           "transformation": "withColumn"
-        }
-      ],
-      "lineage": [
-        {
-          "target_col": "prev_ts",
-          "sources": []
         }
       ]
     },
@@ -89,12 +63,6 @@
           "expression": "(F.col('event_ts').cast('long') - F.col('prev_ts').cast('long')) / 60.0",
           "transformation": "withColumn"
         }
-      ],
-      "lineage": [
-        {
-          "target_col": "gap_min",
-          "sources": []
-        }
       ]
     },
     {
@@ -106,12 +74,6 @@
           "derived_from": [],
           "expression": "F.when(F.col('gap_min').isNull() | (F.col('gap_min') > 30), 1).otherwise(0)",
           "transformation": "withColumn"
-        }
-      ],
-      "lineage": [
-        {
-          "target_col": "new_session_flag",
-          "sources": []
         }
       ]
     },
@@ -125,12 +87,6 @@
           "expression": "F.sum('new_session_flag').over(w)",
           "transformation": "withColumn"
         }
-      ],
-      "lineage": [
-        {
-          "target_col": "session_num",
-          "sources": []
-        }
       ]
     },
     {
@@ -143,37 +99,27 @@
           "expression": "F.concat_ws('-', F.col('customer_id'), F.col('event_date'), F.col('session_num'))",
           "transformation": "withColumn"
         }
-      ],
-      "lineage": [
-        {
-          "target_col": "session_id",
-          "sources": []
-        }
       ]
     },
     {
       "df_name": "agg_sql",
       "type": "intermediate",
-      "columns": [],
-      "lineage": []
+      "columns": []
     },
     {
       "df_name": "sess_agg",
       "type": "intermediate",
-      "columns": [],
-      "lineage": []
+      "columns": []
     },
     {
       "df_name": "out",
       "type": "intermediate",
-      "columns": [],
-      "lineage": []
+      "columns": []
     },
     {
       "df_name": "spark",
       "type": "sink",
-      "columns": [],
-      "lineage": []
+      "columns": []
     }
   ],
   "assets": {
@@ -199,7 +145,7 @@
   "bedrock_enrichment": {
     "group_by": [
       {
-        "df": "sess_agg",
+        "df": "sessions",
         "keys": [
           "customer_id",
           "session_id"
@@ -208,7 +154,7 @@
     ],
     "aggregations": [
       {
-        "df": "sess_agg",
+        "df": "sessions",
         "expr": "MIN(event_ts)",
         "source_cols": [
           "event_ts"
@@ -216,7 +162,7 @@
         "alias": "session_start_ts"
       },
       {
-        "df": "sess_agg",
+        "df": "sessions",
         "expr": "MAX(event_ts)",
         "source_cols": [
           "event_ts"
@@ -224,7 +170,7 @@
         "alias": "session_end_ts"
       },
       {
-        "df": "sess_agg",
+        "df": "sessions",
         "expr": "COUNT(1)",
         "source_cols": [
           "*"
@@ -232,7 +178,7 @@
         "alias": "events"
       },
       {
-        "df": "sess_agg",
+        "df": "sessions",
         "expr": "COUNT(DISTINCT url_host)",
         "source_cols": [
           "url_host"
@@ -317,7 +263,6 @@
         ]
       }
     ],
-    "joins": [],
     "sql_blocks": [
       {
         "name": "agg_sql",
